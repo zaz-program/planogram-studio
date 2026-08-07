@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planogram & Visual Merchandising Studio - Custom Rak, Upload Gambar & Sales Analytics</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Merchandising Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2canvas for Exporting PNG Image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- html2pdf for Automated PDF Spec Sheet Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .shelf-wood {
+            background: linear-gradient(180deg, #d4a373 0%, #bc6c25 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.4), 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .shelf-metal {
+            background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .shelf-black {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .golden-zone-overlay {
+            background: rgba(234, 179, 8, 0.15);
+            border: 2px dashed #ca8a04;
+        }
+        .heatmap-high {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, rgba(239, 68, 68, 0) 70%);
+        }
+        .heatmap-medium {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.4) 0%, rgba(245, 158, 11, 0) 70%);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .facing-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .facing-item:hover {
+            transform: translateY(-4px) scale(1.02);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 z-20 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-brand-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-brand-600/20">
+                <i class="fa-solid fa-layer-group text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-wide text-slate-900">Planogram & Visual Merchandising Studio</h1>
+                <p class="text-xs text-slate-500">Ukuran Rak Custom, Foto Produk, Sales Analytics & Export PDF Spec Sheet</p>
+            </div>
+        </div>
+
+        <!-- Mode Switches & View Controllers -->
+        <div class="flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button id="btn-mode-design" onclick="switchViewMode('design')" class="px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition bg-brand-600 text-white shadow-sm">
+                <i class="fa-solid fa-pen-ruler"></i>
+                <span>Design Mode</span>
+            </button>
+            <button id="btn-mode-heatmap" onclick="switchViewMode('heatmap')" class="px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900">
+                <i class="fa-solid fa-fire text-amber-500"></i>
+                <span>Heatmap Eye-Level</span>
+            </button>
+            <button id="btn-mode-audit" onclick="switchViewMode('audit')" class="px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900">
+                <i class="fa-solid fa-clipboard-check text-emerald-600"></i>
+                <span>Audit Rules & Profit</span>
+            </button>
+        </div>
+
+        <!-- Top Actions (Product Add, PNG Download, PDF Spec Export) -->
+        <div class="flex items-center space-x-2">
+            <select id="preset-select" onchange="loadPresetLayout(this.value)" class="bg-white text-xs text-slate-700 border border-slate-300 rounded-lg px-3 py-2 outline-none focus:border-brand-500 cursor-pointer shadow-sm">
+                <option value="custom">Preset Layout: Custom</option>
+                <option value="supermarket-bev">Supermarket: Minuman Botol</option>
+                <option value="snack-endcap">Snack & Biskuik Endcap</option>
+                <option value="beauty-care">Health & Beauty Gondola</option>
+            </select>
+            <button onclick="openNewProductModal()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition shadow-sm">
+                <i class="fa-solid fa-plus text-white"></i>
+                <span>Produk Baru</span>
+            </button>
+            <button onclick="downloadPlanogramImage()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition shadow-sm">
+                <i class="fa-solid fa-download"></i>
+                <span>Gambar (PNG)</span>
+            </button>
+            <button onclick="exportPDFSpecSheet()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition shadow-sm">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Export PDF Spec</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- LEFT SIDEBAR: Fixture Settings & Product Library -->
+        <aside class="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 z-10 shadow-sm">
+            <!-- Sidebar Navigation Tabs -->
+            <div class="flex border-b border-slate-200 text-xs font-semibold text-slate-500 bg-slate-50/50">
+                <button id="tab-btn-products" onclick="switchSidebarTab('products')" class="flex-1 py-3 text-center border-b-2 border-brand-600 text-brand-600 font-bold bg-white">
+                    <i class="fa-solid fa-boxes-stacked mr-1"></i> Katalog Produk
+                </button>
+                <button id="tab-btn-fixture" onclick="switchSidebarTab('fixture')" class="flex-1 py-3 text-center border-b-2 border-transparent hover:text-slate-800">
+                    <i class="fa-solid fa-sliders mr-1"></i> Setting Gondola & Rak
+                </button>
+            </div>
+
+            <!-- Tab 1: Product Library -->
+            <div id="sidebar-tab-products" class="flex-1 flex flex-col p-4 overflow-hidden">
+                <div class="space-y-2 mb-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                        <input type="text" id="product-search" oninput="filterProducts()" placeholder="Cari nama, SKU, atau brand..." class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-brand-500 focus:bg-white">
+                    </div>
+                    <div class="flex space-x-1 overflow-x-auto no-scrollbar pb-1 text-[11px]">
+                        <button onclick="filterCategory('ALL')" class="category-btn bg-brand-600 text-white px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm">Semua</button>
+                        <button onclick="filterCategory('Beverage')" class="category-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap">Minuman</button>
+                        <button onclick="filterCategory('Snack')" class="category-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap">Makanan</button>
+                        <button onclick="filterCategory('Personal Care')" class="category-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap">Personal Care</button>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-slate-500 mb-2 flex justify-between items-center">
+                    <span>Klik / Seret produk ke rak target</span>
+                    <span id="product-count-badge" class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono border border-slate-200">0 produk</span>
+                </div>
+
+                <div id="product-library-grid" class="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar">
+                    <!-- Dynamic Product List Cards -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Fixture Controls (Custom Dimension Rak) -->
+            <div id="sidebar-tab-fixture" class="hidden flex-1 p-4 space-y-4 overflow-y-auto">
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3.5">
+                    <h3 class="text-xs font-semibold text-brand-600 uppercase tracking-wider flex items-center justify-between">
+                        <span>Dimensi Gondola / Custom Rak</span>
+                        <i class="fa-solid fa-ruler-combined"></i>
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">Tipe Fixture Display</label>
+                        <select id="fixture-type" onchange="updateFixtureSettings()" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500 shadow-sm">
+                            <option value="gondola">Wall Gondola Standard</option>
+                            <option value="endcap">Island Endcap Display</option>
+                            <option value="cooler">Refrigerated Cooler Cabinet</option>
+                        </select>
+                    </div>
+
+                    <!-- CUSTOM UKURAN LEBAR RAK -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <label class="text-slate-700 font-medium">Lebar Bay Rak (cm):</label>
+                            <span id="lbl-bay-width" class="font-bold text-brand-600 font-mono">120 cm</span>
+                        </div>
+                        <input type="range" id="input-bay-width" min="60" max="240" step="10" value="120" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                            <span>60cm</span>
+                            <span>120cm</span>
+                            <span>240cm</span>
+                        </div>
+                    </div>
+
+                    <!-- CUSTOM UKURAN TINGGI GONDOLA -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <label class="text-slate-700 font-medium">Tinggi Total Rak (cm):</label>
+                            <span id="lbl-gondola-height" class="font-bold text-brand-600 font-mono">180 cm</span>
+                        </div>
+                        <input type="range" id="input-gondola-height" min="100" max="250" step="10" value="180" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                            <span>100cm</span>
+                            <span>180cm</span>
+                            <span>250cm</span>
+                        </div>
+                    </div>
+
+                    <!-- JUMLAH RAK / SHELF COUNT -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <label class="text-slate-700 font-medium">Jumlah Tingkat Rak (Shelves):</label>
+                            <span id="lbl-shelf-count" class="font-bold text-slate-900 font-mono">5</span>
+                        </div>
+                        <input type="range" id="input-shelf-count" min="3" max="8" value="5" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">Bahan & Material Rak</label>
+                        <select id="shelf-material" onchange="updateFixtureSettings()" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-brand-500 shadow-sm">
+                            <option value="metal">White Metal Powdercoat</option>
+                            <option value="black">Matte Black Industrial</option>
+                            <option value="wood">Natural Wood Finished</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <h3 class="text-xs font-semibold text-amber-600 uppercase tracking-wider flex items-center justify-between">
+                        <span>Zona Tingkat Pandang (Height)</span>
+                        <i class="fa-solid fa-eye"></i>
+                    </h3>
+                    <ul class="text-[11px] space-y-1.5 text-slate-600">
+                        <li class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shrink-0"></span>
+                            <span><strong>Rak Atas (1.6m+):</strong> Niche / Top Brand</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block shrink-0"></span>
+                            <span><strong>Golden Zone (1.2m-1.5m):</strong> High Margin / Impulse</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shrink-0"></span>
+                            <span><strong>Touch Zone (0.8m-1.1m):</strong> Fast Movers</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block shrink-0"></span>
+                            <span><strong>Rak Bawah (&lt;0.7m):</strong> Bulk & Produk Berat</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="resetPlanogram()" class="w-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center space-x-2 shadow-sm">
+                        <i class="fa-solid fa-trash-arrow-up"></i>
+                        <span>Kosongkan Semua Rak</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER WORKSPACE: Planogram Shelf Canvas -->
+        <main class="flex-1 bg-slate-200/70 flex flex-col overflow-hidden relative">
+            <div class="bg-white border-b border-slate-200 px-6 py-2 flex justify-between items-center text-xs text-slate-600 z-10 shrink-0 shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <span><i class="fa-solid fa-ruler-horizontal text-brand-600 mr-1"></i> Lebar Bay: <strong id="canvas-bay-width-display" class="text-slate-800">120 cm</strong></span>
+                    <span><i class="fa-solid fa-ruler-vertical text-brand-600 mr-1"></i> Tinggi: <strong id="canvas-gondola-height-display" class="text-slate-800">180 cm</strong></span>
+                    <span id="selected-shelf-indicator" class="text-brand-600 font-medium"><i class="fa-solid fa-hand-pointer mr-1"></i> Klik rak untuk memilih</span>
+                </div>
+                <div id="vm-status-tag" class="bg-amber-50 border border-amber-300 text-amber-700 px-2.5 py-0.5 rounded-full text-[11px] font-medium flex items-center space-x-1">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Golden Zone Target: 35%+ Space</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-8 flex justify-center items-start no-scrollbar relative select-none">
+                <!-- DYNAMIC GONDOLA CANVAS CONTAINER -->
+                <div id="gondola-frame" class="bg-white border-4 border-slate-300 rounded-xl p-6 shadow-xl relative flex flex-col justify-between transition-all duration-300" style="width: 760px; min-height: 680px;">
+                    <div id="gondola-canopy" class="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-white py-2 px-4 rounded-md shadow text-center mb-6 border border-brand-400 flex items-center justify-between">
+                        <span class="text-xs uppercase font-bold tracking-wider" id="canopy-title">Kategori: Beverage & Refreshment</span>
+                        <span class="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded font-mono" id="canopy-bay-code">BAY #01 • 120cm</span>
+                    </div>
+
+                    <div id="shelves-container" class="flex-1 flex flex-col justify-between space-y-6 relative">
+                        <!-- Dynamic Shelves generated via Javascript -->
+                    </div>
+
+                    <div class="mt-6 h-8 bg-slate-100 border-t-2 border-slate-300 rounded-b-md flex justify-between items-center px-6 text-[10px] text-slate-500 font-mono">
+                        <span>FLOOR LEVEL (0 cm)</span>
+                        <span>FIX-BASE HEAVY LOAD UNIT</span>
+                        <span id="footer-spec-plu">PLU #GND-120</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR: Analytics, Item Inspector & VM Audit -->
+        <aside class="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-sm">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-brand-600"></i>
+                    <span>Analisis Merchandising & Sales</span>
+                </h2>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                <!-- ITEM INSPECTOR -->
+                <div id="inspector-panel" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] uppercase font-bold text-brand-600 tracking-wider">Item Inspektor</span>
+                        <span id="insp-sku" class="text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-mono">SKU: -</span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3 my-1">
+                        <!-- Preview gambar produk jika ada -->
+                        <div id="insp-img-container" class="w-12 h-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden hidden shadow-sm">
+                            <img id="insp-img" src="" class="w-full h-full object-contain p-1">
+                        </div>
+                        <div id="insp-title" class="font-bold text-slate-800 text-sm flex-1 leading-tight">Pilih Produk di Rak</div>
+                    </div>
+                    
+                    <div id="insp-details" class="space-y-2 text-slate-600 hidden">
+                        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200 text-[11px]">
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">Harga Jual</span>
+                                <span id="insp-price" class="font-bold text-emerald-600">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">HPP (Harga Beli)</span>
+                                <span id="insp-cost-price" class="font-medium text-slate-700">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">Profit Margin (%)</span>
+                                <span id="insp-margin" class="font-bold text-brand-600">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">Sales/Minggu</span>
+                                <span id="insp-weekly-sales" class="font-bold text-purple-600">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">Kategori / Brand</span>
+                                <span id="insp-category" class="font-medium text-slate-800 truncate block">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-[10px] block">Dimensi (L x T)</span>
+                                <span id="insp-dim" class="font-medium text-slate-800">-</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 p-2 rounded-lg flex items-center justify-between mt-2 shadow-sm">
+                            <span class="text-xs text-slate-600 font-medium">Jumlah Facings:</span>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="adjustFacings(-1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded flex items-center justify-center font-bold text-slate-700 text-sm border border-slate-300">-</button>
+                                <span id="insp-facings-count" class="font-mono text-sm font-bold text-slate-900">1</span>
+                                <button onclick="adjustFacings(1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded flex items-center justify-center font-bold text-slate-700 text-sm border border-slate-300">+</button>
+                            </div>
+                        </div>
+
+                        <button onclick="removeSelectedItem()" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 py-1.5 rounded text-xs transition font-medium mt-1">
+                            <i class="fa-solid fa-trash mr-1"></i> Hapus dari Rak
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI MERCHANDISING & FINANCIAL METRICS -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-calculator text-brand-600"></i>
+                        <span>Key Financial & Space Metrics</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Est. Inventory Value</span>
+                            <span id="kpi-stock-value" class="text-sm font-bold text-slate-900 font-mono truncate block">Rp 0</span>
+                            <span class="text-[10px] text-slate-400 block">Nilai Total Stok Rak</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Est. Omset Mingguan</span>
+                            <span id="kpi-weekly-revenue" class="text-sm font-bold text-emerald-600 font-mono truncate block">Rp 0</span>
+                            <span class="text-[10px] text-slate-400 block">Est. Revenue / Wk</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Est. Gross Profit / Wk</span>
+                            <span id="kpi-weekly-profit" class="text-sm font-bold text-brand-600 font-mono truncate block">Rp 0</span>
+                            <span id="kpi-profit-margin-avg" class="text-[10px] text-brand-500 font-semibold block">Avg Margin: 0%</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Profitabilitas Ruang Rak</span>
+                            <span id="kpi-revenue-per-cm" class="text-sm font-bold text-purple-600 font-mono truncate block">Rp 0 /cm</span>
+                            <span class="text-[10px] text-slate-400 block">Revenue per Cm Linier</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Total Item Capacity</span>
+                            <span id="kpi-total-capacity" class="text-base font-bold text-slate-800 font-mono">0 Facings</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                            <span class="text-slate-500 text-[10px] block">Space Occupancy</span>
+                            <span id="kpi-space-utilization" class="text-base font-bold text-emerald-600 font-mono">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORY CHART -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-700 mb-2 flex justify-between items-center">
+                        <span>Share of Space Kategori</span>
+                        <i class="fa-solid fa-chart-pie text-slate-400"></i>
+                    </h3>
+                    <div class="relative h-40 flex items-center justify-center">
+                        <canvas id="category-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- AUDIT CHECKLIST -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                    <h3 class="text-xs font-bold text-slate-700 flex justify-between items-center">
+                        <span>VM & Profit Audit Rules</span>
+                        <span id="audit-score-badge" class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold">100% Pass</span>
+                    </h3>
+                    <div id="audit-checklist-items" class="space-y-1.5 text-[11px]"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modal: Add Custom Product with Financials & Image Upload -->
+    <div id="modal-new-product" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col text-slate-800">
+            <button onclick="closeNewProductModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center space-x-2 shrink-0 border-b border-slate-200 pb-3">
+                <i class="fa-solid fa-box-open text-brand-600"></i>
+                <span>Tambah Produk Baru ke Katalog</span>
+            </h3>
+
+            <form id="form-add-product" onsubmit="handleCreateProduct(event)" class="space-y-3 text-xs overflow-y-auto pr-1 no-scrollbar flex-1">
+                
+                <!-- INPUT UPLOAD GAMBAR PRODUK BARU -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-dashed border-slate-300 space-y-2">
+                    <label class="block text-slate-700 font-medium flex items-center justify-between">
+                        <span>Foto / Gambar Produk</span>
+                        <span class="text-[10px] text-slate-400">(Format PNG / JPG / WebP)</span>
+                    </label>
+                    
+                    <div class="flex items-center space-x-3">
+                        <!-- Preview Box Image -->
+                        <div id="img-preview-box" class="w-16 h-16 rounded-lg bg-white border border-slate-300 flex items-center justify-center shrink-0 overflow-hidden text-slate-400 relative group shadow-sm">
+                            <i class="fa-solid fa-image text-xl" id="img-preview-placeholder"></i>
+                            <img id="img-preview-elem" class="w-full h-full object-contain hidden" alt="Preview">
+                        </div>
+
+                        <div class="flex-1 space-y-1.5">
+                            <input type="file" id="new-prod-image-file" accept="image/*" onchange="previewSelectedImage(this)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-500 cursor-pointer">
+                            <div class="text-[10px] text-slate-400">Atau tempel URL gambar jika ada:</div>
+                            <input type="url" id="new-prod-image-url" oninput="previewUrlImage(this.value)" placeholder="https://example.com/foto-produk.png" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 text-[11px] outline-none focus:border-brand-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 mb-1 font-medium">Nama Produk *</label>
+                    <input type="text" id="new-prod-name" required placeholder="Contoh: Sparkling Water 500ml" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">SKU Code *</label>
+                        <input type="text" id="new-prod-sku" required placeholder="BEV-8801" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Barcode (Manual)</label>
+                        <input type="text" id="new-prod-barcode" placeholder="8991234567890" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500 font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Kategori Produk *</label>
+                        <input type="text" id="new-prod-category" required placeholder="Minuman, Snack, Beauty, dll." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Brand / Merek</label>
+                        <input type="text" id="new-prod-brand" placeholder="Contoh: Aqua, Indofood" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <!-- FINANCIALS: HARGA JUAL, HPP, EST. SALES VOLUME -->
+                <div class="bg-blue-50/70 border border-blue-200 p-3 rounded-xl space-y-2">
+                    <span class="text-[11px] font-bold text-brand-700 uppercase tracking-wider block">Finansial & Est. Penjualan (Sales Data)</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-slate-700 mb-1 font-medium">Harga Jual (Rp) *</label>
+                            <input type="number" id="new-prod-price" required placeholder="15000" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1 font-medium">HPP / Beli (Rp) *</label>
+                            <input type="number" id="new-prod-cost-price" required placeholder="10000" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 mb-1 font-medium">Sales/Mgg (Unit) *</label>
+                            <input type="number" id="new-prod-weekly-sales" required placeholder="30" value="25" min="0" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Lebar Unit (cm) *</label>
+                        <input type="number" id="new-prod-width" required value="8" min="1" max="120" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Tinggi Unit (cm) *</label>
+                        <input type="number" id="new-prod-height" required value="20" min="1" max="180" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <!-- BARIS KEMASAN: WARNA KEMASAN + INPUT TEKS MANUAL KEMASAN / ICON -->
+                <div>
+                    <label class="block text-slate-700 mb-1 font-medium">Warna Kemasan & Visual Icon Fallback</label>
+                    <div class="flex items-center space-x-2">
+                        <!-- Color Picker & HEX -->
+                        <div class="flex items-center space-x-1.5 bg-white border border-slate-300 rounded-lg px-2 py-1 focus-within:border-brand-500 shrink-0">
+                            <input type="color" id="new-prod-color" value="#0284c7" oninput="syncColorPickerToHex(this.value)" class="w-7 h-7 rounded bg-transparent cursor-pointer border-0">
+                            <input type="text" id="new-prod-color-hex" value="#0284C7" oninput="syncHexToColorPicker(this.value)" placeholder="#0284C7" maxlength="7" class="w-16 bg-transparent text-slate-800 text-xs outline-none font-mono uppercase border-l border-slate-300 pl-1.5">
+                        </div>
+
+                        <!-- INPUT TEKS MANUAL KEMASAN -->
+                        <div class="flex-1 relative flex items-center">
+                            <input type="text" id="new-prod-icon-text" list="icon-presets-list" oninput="autoSelectIconFromText(this.value)" placeholder="Ketik jenis kemasan (mis. Botol Kaca...)" class="w-full bg-white border border-slate-300 rounded-l-lg pl-3 pr-2 py-2 text-slate-800 outline-none focus:border-brand-500 text-xs">
+                            <datalist id="icon-presets-list">
+                                <option value="Botol Minuman (Bottle)"></option>
+                                <option value="Kaleng Beverage (Can)"></option>
+                                <option value="Biskuit / Snack Pack"></option>
+                                <option value="Botol Pump Shampoo/Sabun"></option>
+                                <option value="Kotak Box Carton"></option>
+                                <option value="Jar / Toples Kaca"></option>
+                                <option value="Pouch / Kantong Bag"></option>
+                            </datalist>
+
+                            <!-- SELECTOR IKON FontAwesome -->
+                            <select id="new-prod-icon-select" class="bg-slate-100 text-slate-800 border border-slate-300 border-l-0 text-xs py-2 px-2 rounded-r-lg outline-none cursor-pointer focus:border-brand-500 shrink-0">
+                                <option value="fa-bottle-water">🍾 Botol</option>
+                                <option value="fa-wine-can">🥤 Kaleng</option>
+                                <option value="fa-cookie-bite">🍪 Snack</option>
+                                <option value="fa-pump-soap">🧴 Pump</option>
+                                <option value="fa-box">📦 Box</option>
+                                <option value="fa-jar">🫙 Jar</option>
+                                <option value="fa-bag-shopping">🛍️ Bag</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex space-x-2 shrink-0 border-t border-slate-200 mt-2">
+                    <button type="button" onclick="closeNewProductModal()" class="flex-1 border border-slate-300 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-100 transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white py-2 rounded-lg font-medium shadow-sm transition">Simpan Produk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script>
+        // State utama Planogram
+        let planogramData = {
+            fixtureType: 'gondola',
+            bayWidth: 120,          // Ukuran lebar bay rak dalam cm
+            gondolaHeight: 180,     // Ukuran tinggi gondola dalam cm
+            shelfCount: 5,
+            shelfMaterial: 'metal',
+            shelves: []
+        };
+
+        // Data Gambar Base64 Temporary untuk Upload New Product
+        let uploadedImageBase64 = '';
+
+        // Katalog Produk Default (Termasuk contoh HPP & Weekly Sales Volume)
+        let productLibrary = [
+            { 
+                id: 'p1', sku: 'BEV-001', barcode: '8991001000123', brand: 'SodaCo', supplier: 'PT Minuman Segar', cartonQty: 24, 
+                name: 'Cola Soda Can 330ml', category: 'Beverage', shapeName: 'Kaleng Beverage (Can)', 
+                price: 8500, costPrice: 5500, weeklySales: 45, width: 7, height: 12, color: '#EF4444', icon: 'fa-wine-can',
+                imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=150&auto=format&fit=crop&q=80'
+            },
+            { 
+                id: 'p2', sku: 'BEV-002', barcode: '8991001000124', brand: 'AquaPure', supplier: 'PT Tirta Utama', cartonQty: 24, 
+                name: 'Mineral Water 600ml', category: 'Beverage', shapeName: 'Botol Minuman (Bottle)', 
+                price: 4000, costPrice: 2400, weeklySales: 120, width: 7, height: 22, color: '#0EA5E9', icon: 'fa-bottle-water',
+                imageUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=150&auto=format&fit=crop&q=80'
+            },
+            { 
+                id: 'p3', sku: 'BEV-003', barcode: '8991001000125', brand: 'FitDrink', supplier: 'PT Minuman Segar', cartonQty: 12, 
+                name: 'Isotonic Orange 500ml', category: 'Beverage', shapeName: 'Botol Minuman (Bottle)', 
+                price: 9000, costPrice: 5800, weeklySales: 35, width: 8, height: 20, color: '#F97316', icon: 'fa-bottle-water',
+                imageUrl: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=150&auto=format&fit=crop&q=80'
+            },
+            { 
+                id: 'p4', sku: 'SNK-101', barcode: '8992002000456', brand: 'Chippy', supplier: 'PT Snack Nusantara', cartonQty: 30, 
+                name: 'Potato Chips Barbeque', category: 'Snack', shapeName: 'Biskuit / Snack Pack', 
+                price: 12500, costPrice: 8000, weeklySales: 50, width: 12, height: 18, color: '#EAB308', icon: 'fa-box',
+                imageUrl: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=150&auto=format&fit=crop&q=80'
+            },
+            { 
+                id: 'p5', sku: 'SNK-102', barcode: '8992002000457', brand: 'Wafero', supplier: 'PT Snack Nusantara', cartonQty: 20, 
+                name: 'Chocolate Wafer Pack', category: 'Snack', shapeName: 'Biskuit / Snack Pack', 
+                price: 11000, costPrice: 7200, weeklySales: 30, width: 10, height: 15, color: '#854D0E', icon: 'fa-cookie-bite',
+                imageUrl: ''
+            },
+            { 
+                id: 'p6', sku: 'PC-201', barcode: '8993003000789', brand: 'GlowCare', supplier: 'PT Beauty Cosmetics', cartonQty: 12, 
+                name: 'Gentle Shampoo 200ml', category: 'Personal Care', shapeName: 'Botol Pump Shampoo/Sabun', 
+                price: 24500, costPrice: 16000, weeklySales: 20, width: 8, height: 16, color: '#10B981', icon: 'fa-pump-soap',
+                imageUrl: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=150&auto=format&fit=crop&q=80'
+            },
+            { 
+                id: 'p7', sku: 'PC-202', barcode: '8993003000790', brand: 'GlowCare', supplier: 'PT Beauty Cosmetics', cartonQty: 12, 
+                name: 'Body Wash Ocean 450ml', category: 'Personal Care', shapeName: 'Botol Pump Shampoo/Sabun', 
+                price: 32000, costPrice: 21000, weeklySales: 15, width: 10, height: 21, color: '#6366F1', icon: 'fa-pump-soap',
+                imageUrl: ''
+            }
+        ];
+
+        let selectedShelfIndex = 0;
+        let selectedItemRef = null;
+        let currentActiveCategory = 'ALL';
+        let currentViewMode = 'design';
+        let categoryChartInstance = null;
+
+        // Inisialisasi saat window dimuat
+        window.onload = function() {
+            initPlanogramState(5);
+            renderProductLibrary();
+            renderShelves();
+            initCategoryChart();
+            updateAnalytics();
+            showToast('Planogram Studio & Sales Analytics siap digunakan!');
+        };
+
+        /* PREVIEW FOTO DARI FILE INPUT BERBASIS FILEREADER */
+        function previewSelectedImage(inputElem) {
+            if (inputElem.files && inputElem.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageBase64 = e.target.result;
+                    showImagePreview(uploadedImageBase64);
+                };
+                reader.readAsDataURL(inputElem.files[0]);
+            }
+        }
+
+        /* PREVIEW DARI INPUT URL TEKS */
+        function previewUrlImage(urlValue) {
+            if (urlValue.trim().length > 5) {
+                uploadedImageBase64 = urlValue.trim();
+                showImagePreview(uploadedImageBase64);
+            }
+        }
+
+        function showImagePreview(src) {
+            const previewImg = document.getElementById('img-preview-elem');
+            const placeholder = document.getElementById('img-preview-placeholder');
+            previewImg.src = src;
+            previewImg.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+        }
+
+        function resetImagePreview() {
+            uploadedImageBase64 = '';
+            document.getElementById('img-preview-elem').src = '';
+            document.getElementById('img-preview-elem').classList.add('hidden');
+            document.getElementById('img-preview-placeholder').classList.remove('hidden');
+            document.getElementById('new-prod-image-file').value = '';
+            document.getElementById('new-prod-image-url').value = '';
+        }
+
+        function syncColorPickerToHex(hexVal) {
+            document.getElementById('new-prod-color-hex').value = hexVal.toUpperCase();
+        }
+
+        function syncHexToColorPicker(textVal) {
+            let formattedHex = textVal.trim();
+            if (!formattedHex.startsWith('#')) {
+                formattedHex = '#' + formattedHex;
+            }
+            if (/^#[0-9A-F]{6}$/i.test(formattedHex)) {
+                document.getElementById('new-prod-color').value = formattedHex;
+            }
+        }
+
+        function autoSelectIconFromText(textVal) {
+            const lower = textVal.toLowerCase();
+            const iconSelect = document.getElementById('new-prod-icon-select');
+            
+            if (lower.includes('botol') || lower.includes('bottle') || lower.includes('kaca')) {
+                iconSelect.value = 'fa-bottle-water';
+            } else if (lower.includes('kaleng') || lower.includes('can')) {
+                iconSelect.value = 'fa-wine-can';
+            } else if (lower.includes('snack') || lower.includes('biskuit') || lower.includes('wafer')) {
+                iconSelect.value = 'fa-cookie-bite';
+            } else if (lower.includes('pump') || lower.includes('sabun') || lower.includes('shampoo')) {
+                iconSelect.value = 'fa-pump-soap';
+            } else if (lower.includes('box') || lower.includes('dus') || lower.includes('karton')) {
+                iconSelect.value = 'fa-box';
+            } else if (lower.includes('jar') || lower.includes('toples')) {
+                iconSelect.value = 'fa-jar';
+            } else if (lower.includes('pouch') || lower.includes('bag') || lower.includes('kantong')) {
+                iconSelect.value = 'fa-bag-shopping';
+            }
+        }
+
+        function initPlanogramState(shelfCount) {
+            planogramData.shelfCount = shelfCount;
+            planogramData.shelves = [];
+            const h = planogramData.gondolaHeight;
+
+            for (let i = 0; i < shelfCount; i++) {
+                planogramData.shelves.push({
+                    id: `shelf-${i}`,
+                    levelHeightCm: Math.round(h - (i * (h / shelfCount))),
+                    items: []
+                });
+            }
+        }
+
+        /* UPDATE DYNAMIC FIXTURE SETTINGS (LEBAR, TINGGI, RAK) */
+        function updateFixtureSettings() {
+            const count = parseInt(document.getElementById('input-shelf-count').value);
+            const bayW = parseInt(document.getElementById('input-bay-width').value);
+            const gondolaH = parseInt(document.getElementById('input-gondola-height').value);
+            const type = document.getElementById('fixture-type').value;
+            const mat = document.getElementById('shelf-material').value;
+
+            planogramData.bayWidth = bayW;
+            planogramData.gondolaHeight = gondolaH;
+            planogramData.fixtureType = type;
+            planogramData.shelfMaterial = mat;
+
+            // Update Label Tampilan
+            document.getElementById('lbl-shelf-count').innerText = count;
+            document.getElementById('lbl-bay-width').innerText = `${bayW} cm`;
+            document.getElementById('lbl-gondola-height').innerText = `${gondolaH} cm`;
+            
+            document.getElementById('canvas-bay-width-display').innerText = `${bayW} cm`;
+            document.getElementById('canvas-gondola-height-display').innerText = `${gondolaH} cm`;
+            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${bayW}cm`;
+            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${bayW}`;
+
+            // Sesuaikan Ukuran Frame Gondola Canvas
+            const frame = document.getElementById('gondola-frame');
+            const scaledWidthPx = Math.max(500, Math.min(1000, bayW * 6));
+            frame.style.width = `${scaledWidthPx}px`;
+
+            initPlanogramState(count);
+            renderShelves();
+            updateAnalytics();
+        }
+
+        /* RENDER TIAP RAK DI CANVAS */
+        function renderShelves() {
+            const container = document.getElementById('shelves-container');
+            container.innerHTML = '';
+
+            const materialClass = planogramData.shelfMaterial === 'wood' ? 'shelf-wood' : 
+                                 planogramData.shelfMaterial === 'black' ? 'shelf-black' : 'shelf-metal';
+
+            planogramData.shelves.forEach((shelf, sIndex) => {
+                const isGoldenZone = shelf.levelHeightCm >= 120 && shelf.levelHeightCm <= 150;
+                const isSelected = selectedShelfIndex === sIndex;
+
+                const shelfDiv = document.createElement('div');
+                shelfDiv.className = `relative flex flex-col justify-end transition-all rounded-md ${isSelected ? 'ring-2 ring-brand-500/80' : ''}`;
+                shelfDiv.onclick = () => selectShelf(sIndex);
+
+                let zoneTag = '';
+                if (shelf.levelHeightCm >= 160) zoneTag = '<span class="text-blue-600 font-semibold">Top Zone</span>';
+                else if (isGoldenZone) zoneTag = '<span class="text-amber-600 font-bold">★ GOLDEN EYE-LEVEL</span>';
+                else if (shelf.levelHeightCm >= 80) zoneTag = '<span class="text-emerald-600 font-semibold">Touch Zone</span>';
+                else zoneTag = '<span class="text-slate-500">Bottom Heavy Zone</span>';
+
+                shelfDiv.innerHTML = `
+                    <div class="flex justify-between items-center text-[10px] text-slate-500 px-2 py-0.5 mb-1">
+                        <span class="font-mono font-bold text-slate-800">${shelf.levelHeightCm} cm</span>
+                        <div class="flex items-center space-x-2">
+                            ${zoneTag}
+                        </div>
+                    </div>
+
+                    <div class="min-h-[90px] bg-slate-50/80 border border-dashed ${isSelected ? 'border-brand-500 bg-brand-50/20' : 'border-slate-300'} rounded flex items-end px-3 py-1.5 overflow-x-auto space-x-1.5 no-scrollbar relative ${currentViewMode === 'heatmap' && isGoldenZone ? 'golden-zone-overlay' : ''}">
+                        
+                        ${currentViewMode === 'heatmap' ? `
+                            <div class="absolute inset-0 pointer-events-none ${isGoldenZone ? 'heatmap-high' : 'heatmap-medium'} opacity-30"></div>
+                        ` : ''}
+
+                        ${shelf.items.length === 0 ? `
+                            <div class="w-full h-full flex items-center justify-center text-slate-400 text-[11px] italic pointer-events-none">
+                                Rak Kosong (${planogramData.bayWidth}cm) - Klik produk untuk menambahkan
+                            </div>
+                        ` : ''}
+
+                        ${shelf.items.map((item, iIndex) => renderShelfItemHTML(item, sIndex, iIndex)).join('')}
+                    </div>
+
+                    <div class="${materialClass} h-4 w-full rounded-b-md flex items-center justify-between px-3 text-[9px] font-mono font-bold text-slate-800 tracking-wider uppercase border-t border-white/40 shadow-sm">
+                        <span>Shelf #${sIndex + 1}</span>
+                        <span>Width: ${planogramData.bayWidth}cm</span>
+                    </div>
+                `;
+
+                container.appendChild(shelfDiv);
+            });
+        }
+
+        /* RENDER ITEM RAK DENGAN FOTO PRODUK / FALLBACK ICON */
+        function renderShelfItemHTML(item, sIndex, iIndex) {
+            const isSelected = selectedItemRef && selectedItemRef.shelfIndex === sIndex && selectedItemRef.itemIndex === iIndex;
+            const itemWidthPx = Math.max(38, item.width * 5);
+            const itemHeightPx = Math.max(50, Math.min(85, (item.height || 18) * 3.5));
+
+            let facingsHTML = '';
+            for (let f = 0; f < item.facings; f++) {
+                const hasImg = item.imageUrl && item.imageUrl.trim() !== '';
+
+                facingsHTML += `
+                    <div class="flex-shrink-0 flex flex-col items-center justify-between rounded-t border-x border-t border-slate-300 shadow-sm relative group overflow-hidden p-0.5" style="background-color: ${item.color}; width: ${itemWidthPx}px; height: ${itemHeightPx}px;">
+                        
+                        ${hasImg ? `
+                            <div class="w-full h-full bg-white rounded-t flex items-center justify-center overflow-hidden">
+                                <img src="${item.imageUrl}" class="w-full h-full object-contain p-0.5" crossorigin="anonymous" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\\'fa-solid ${item.icon} text-white text-base drop-shadow\\'></i>';">
+                            </div>
+                        ` : `
+                            <div class="w-full h-full flex flex-col items-center justify-center">
+                                <i class="fa-solid ${item.icon} text-white text-base drop-shadow"></i>
+                                <span class="text-[8px] text-white font-bold truncate px-0.5 max-w-full drop-shadow-sm">${item.name.split(' ')[0]}</span>
+                            </div>
+                        `}
+
+                        ${f === 0 ? `<span class="absolute -top-1 -right-1 bg-slate-900 text-amber-300 text-[8px] px-1 rounded-full font-mono font-bold z-10 border border-amber-400">${item.facings}x</span>` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <div onclick="event.stopPropagation(); selectShelfItem(${sIndex}, ${iIndex})" class="facing-item flex space-x-0.5 cursor-pointer p-0.5 rounded items-end ${isSelected ? 'ring-2 ring-amber-500 bg-amber-100/60' : ''}">
+                    ${facingsHTML}
+                </div>
+            `;
+        }
+
+        /* RENDER KATALOG PRODUK DI SIDEBAR KIRI */
+        function renderProductLibrary() {
+            const grid = document.getElementById('product-library-grid');
+            grid.innerHTML = '';
+
+            const searchTerm = document.getElementById('product-search').value.toLowerCase();
+
+            const filtered = productLibrary.filter(p => {
+                const matchCat = currentActiveCategory === 'ALL' || p.category.toLowerCase() === currentActiveCategory.toLowerCase();
+                const matchSearch = p.name.toLowerCase().includes(searchTerm) || 
+                                    p.sku.toLowerCase().includes(searchTerm) || 
+                                    (p.brand && p.brand.toLowerCase().includes(searchTerm));
+                return matchCat && matchSearch;
+            });
+
+            document.getElementById('product-count-badge').innerText = `${filtered.length} produk`;
+
+            filtered.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200/80 hover:border-brand-500 hover:bg-white p-2 rounded-xl flex items-center justify-between cursor-pointer transition group shadow-sm";
+                card.onclick = () => addProductToShelf(prod);
+
+                const hasImg = prod.imageUrl && prod.imageUrl.trim() !== '';
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold shadow-sm shrink-0 overflow-hidden bg-white border border-slate-200" style="${!hasImg ? 'background-color:' + prod.color : ''}">
+                            ${hasImg ? `
+                                <img src="${prod.imageUrl}" class="w-full h-full object-contain p-0.5" onerror="this.onerror=null; this.parentElement.style.backgroundColor='${prod.color}'; this.parentElement.innerHTML='<i class=\\'fa-solid ${prod.icon}\\'></i>';">
+                            ` : `
+                                <i class="fa-solid ${prod.icon}"></i>
+                            `}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-xs font-semibold text-slate-800 group-hover:text-brand-600 transition truncate">${prod.name}</h4>
+                            <div class="flex items-center space-x-1.5 text-[10px] text-slate-500">
+                                <span class="truncate">${prod.brand || prod.category}</span>
+                                <span>•</span>
+                                <span class="text-emerald-600 font-bold font-mono shrink-0">Rp ${prod.price.toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-7 h-7 bg-white hover:bg-brand-600 text-slate-600 hover:text-white rounded-lg flex items-center justify-center transition shrink-0 ml-1 border border-slate-200 shadow-sm">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectShelf(index) {
+            selectedShelfIndex = index;
+            document.getElementById('selected-shelf-indicator').innerHTML = `<i class="fa-solid fa-check-circle text-emerald-400 mr-1"></i> Terpilih: <strong>Shelf #${index + 1} (${planogramData.shelves[index].levelHeightCm}cm)</strong>`;
+            renderShelves();
+        }
+
+        function addProductToShelf(product) {
+            if (selectedShelfIndex === null || selectedShelfIndex >= planogramData.shelves.length) {
+                selectedShelfIndex = 0;
+            }
+
+            const currentShelf = planogramData.shelves[selectedShelfIndex];
+            
+            const existingIndex = currentShelf.items.findIndex(item => item.sku === product.sku);
+            if (existingIndex >= 0) {
+                currentShelf.items[existingIndex].facings += 1;
+                selectedItemRef = { shelfIndex: selectedShelfIndex, itemIndex: existingIndex };
+            } else {
+                currentShelf.items.push({
+                    ...product,
+                    facings: 1
+                });
+                selectedItemRef = { shelfIndex: selectedShelfIndex, itemIndex: currentShelf.items.length - 1 };
+            }
+
+            renderShelves();
+            updateInspector();
+            updateAnalytics();
+            showToast(`Menambahkan ${product.name} ke Rak #${selectedShelfIndex + 1}`);
+        }
+
+        function selectShelfItem(sIndex, iIndex) {
+            selectedShelfIndex = sIndex;
+            selectedItemRef = { shelfIndex: sIndex, itemIndex: iIndex };
+            renderShelves();
+            updateInspector();
+        }
+
+        function updateInspector() {
+            const inspTitle = document.getElementById('insp-title');
+            const inspSku = document.getElementById('insp-sku');
+            const inspDetails = document.getElementById('insp-details');
+            const inspImgContainer = document.getElementById('insp-img-container');
+            const inspImg = document.getElementById('insp-img');
+
+            if (!selectedItemRef) {
+                inspTitle.innerText = "Pilih Produk di Rak";
+                inspSku.innerText = "SKU: -";
+                inspDetails.classList.add('hidden');
+                inspImgContainer.classList.add('hidden');
+                return;
+            }
+
+            const item = planogramData.shelves[selectedItemRef.shelfIndex]?.items[selectedItemRef.itemIndex];
+            if (!item) {
+                selectedItemRef = null;
+                updateInspector();
+                return;
+            }
+
+            inspTitle.innerText = item.name;
+            inspSku.innerText = `SKU: ${item.sku}`;
+
+            if (item.imageUrl && item.imageUrl.trim() !== '') {
+                inspImg.src = item.imageUrl;
+                inspImgContainer.classList.remove('hidden');
+            } else {
+                inspImgContainer.classList.add('hidden');
+            }
+
+            const cost = item.costPrice || (item.price * 0.7);
+            const marginPct = item.price > 0 ? Math.round(((item.price - cost) / item.price) * 100) : 0;
+
+            document.getElementById('insp-price').innerText = `Rp ${item.price.toLocaleString('id-ID')}`;
+            document.getElementById('insp-cost-price').innerText = `Rp ${Math.round(cost).toLocaleString('id-ID')}`;
+            document.getElementById('insp-margin').innerText = `${marginPct}%`;
+            document.getElementById('insp-weekly-sales').innerText = `${item.weeklySales || 20} unit`;
+            document.getElementById('insp-category').innerText = `${item.category} / ${item.brand || '-'}`;
+            document.getElementById('insp-dim').innerText = `${item.width}cm x ${item.height || '-'}cm`;
+            document.getElementById('insp-facings-count').innerText = item.facings;
+            inspDetails.classList.remove('hidden');
+        }
+
+        function adjustFacings(delta) {
+            if (!selectedItemRef) return;
+            const item = planogramData.shelves[selectedItemRef.shelfIndex].items[selectedItemRef.itemIndex];
+            item.facings += delta;
+            if (item.facings <= 0) {
+                removeSelectedItem();
+                return;
+            }
+            renderShelves();
+            updateInspector();
+            updateAnalytics();
+        }
+
+        function removeSelectedItem() {
+            if (!selectedItemRef) return;
+            planogramData.shelves[selectedItemRef.shelfIndex].items.splice(selectedItemRef.itemIndex, 1);
+            selectedItemRef = null;
+            renderShelves();
+            updateInspector();
+            updateAnalytics();
+            showToast('Produk dihapus dari rak');
+        }
+
+        /* KALKULASI FINANSIAL & SALES ANALYTICS */
+        function updateAnalytics() {
+            let totalFacingsCount = 0;
+            let totalWidthUsedCm = 0;
+            let totalStockValue = 0;
+            let totalWeeklyRevenue = 0;
+            let totalWeeklyProfit = 0;
+            let totalWeeklyCost = 0;
+            let goldenZoneFacings = 0;
+            let goldenZoneHighProfitCount = 0;
+            let categorySpaceMap = {};
+
+            const maxCapacityWidthCm = planogramData.shelfCount * planogramData.bayWidth;
+
+            planogramData.shelves.forEach(shelf => {
+                const isGolden = shelf.levelHeightCm >= 120 && shelf.levelHeightCm <= 150;
+
+                shelf.items.forEach(item => {
+                    const itemTotalWidth = item.width * item.facings;
+                    const costPrice = item.costPrice || (item.price * 0.7);
+                    const weeklyUnitSales = item.weeklySales || 20;
+
+                    totalFacingsCount += item.facings;
+                    totalWidthUsedCm += itemTotalWidth;
+                    
+                    // Estimasi Nilai Stok di Rak (3x kapasitas facings)
+                    totalStockValue += (item.price * item.facings * 3);
+
+                    // Est. Omset Mingguan & Profit
+                    const itemRev = item.price * weeklyUnitSales;
+                    const itemCost = costPrice * weeklyUnitSales;
+                    const itemProfit = itemRev - itemCost;
+
+                    totalWeeklyRevenue += itemRev;
+                    totalWeeklyCost += itemCost;
+                    totalWeeklyProfit += itemProfit;
+
+                    if (isGolden) {
+                        goldenZoneFacings += item.facings;
+                        if (itemProfit > 50000) goldenZoneHighProfitCount++;
+                    }
+
+                    categorySpaceMap[item.category] = (categorySpaceMap[item.category] || 0) + itemTotalWidth;
+                });
+            });
+
+            const occupancyPct = Math.min(100, Math.round((totalWidthUsedCm / maxCapacityWidthCm) * 100));
+            const goldenPct = totalFacingsCount > 0 ? Math.round((goldenZoneFacings / totalFacingsCount) * 100) : 0;
+            const avgMarginPct = totalWeeklyRevenue > 0 ? Math.round((totalWeeklyProfit / totalWeeklyRevenue) * 100) : 0;
+            const revenuePerCm = planogramData.bayWidth > 0 ? Math.round(totalWeeklyRevenue / planogramData.bayWidth) : 0;
+
+            document.getElementById('kpi-total-capacity').innerText = `${totalFacingsCount} Facings`;
+            document.getElementById('kpi-space-utilization').innerText = `${occupancyPct}%`;
+            document.getElementById('kpi-stock-value').innerText = `Rp ${totalStockValue.toLocaleString('id-ID')}`;
+            document.getElementById('kpi-weekly-revenue').innerText = `Rp ${totalWeeklyRevenue.toLocaleString('id-ID')}`;
+            document.getElementById('kpi-weekly-profit').innerText = `Rp ${totalWeeklyProfit.toLocaleString('id-ID')}`;
+            document.getElementById('kpi-profit-margin-avg').innerText = `Avg Margin: ${avgMarginPct}%`;
+            document.getElementById('kpi-revenue-per-cm').innerText = `Rp ${revenuePerCm.toLocaleString('id-ID')} /cm`;
+
+            updateCategoryChart(categorySpaceMap);
+            runAuditChecklist(occupancyPct, goldenPct, avgMarginPct, totalWeeklyProfit);
+        }
+
+        function initCategoryChart() {
+            const ctx = document.getElementById('category-chart').getContext('2d');
+            categoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Belum Terisi'],
+                    datasets: [{
+                        data: [100],
+                        backgroundColor: ['#e2e8f0', '#0284c7', '#eab308', '#10b981', '#f97316'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#475569', font: { size: 10 } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function updateCategoryChart(categoryMap) {
+            if (!categoryChartInstance) return;
+
+            const labels = Object.keys(categoryMap);
+            const data = Object.values(categoryMap);
+
+            if (labels.length === 0) {
+                categoryChartInstance.data.labels = ['Belum Terisi'];
+                categoryChartInstance.data.datasets[0].data = [100];
+                categoryChartInstance.data.datasets[0].backgroundColor = ['#e2e8f0'];
+            } else {
+                categoryChartInstance.data.labels = labels;
+                categoryChartInstance.data.datasets[0].data = data;
+                categoryChartInstance.data.datasets[0].backgroundColor = ['#0284c7', '#f97316', '#10b981', '#eab308', '#a855f7', '#ec4899', '#14b8a6'];
+            }
+            categoryChartInstance.update();
+        }
+
+        function runAuditChecklist(occupancyPct, goldenPct, avgMarginPct, totalWeeklyProfit) {
+            const checklistContainer = document.getElementById('audit-checklist-items');
+            const scoreBadge = document.getElementById('audit-score-badge');
+            checklistContainer.innerHTML = '';
+
+            let passCount = 0;
+            const rules = [
+                {
+                    title: 'Golden Zone Eye-Level Target (≥30%)',
+                    passed: goldenPct >= 30,
+                    msg: goldenPct >= 30 ? 'Produk terdistribusi baik di tingkat mata' : 'Tambahkan produk margin tinggi di tingkat pandang mata'
+                },
+                {
+                    title: 'Optimal Shelf Occupancy (60% - 95%)',
+                    passed: occupancyPct >= 60 && occupancyPct <= 95,
+                    msg: occupancyPct < 60 ? 'Rak masih terlalu kosong' : occupancyPct > 95 ? 'Rak terlalu padat / cluttered' : 'Kepadatan rak seimbang'
+                },
+                {
+                    title: 'Gross Margin Target (≥25%)',
+                    passed: avgMarginPct >= 25,
+                    msg: avgMarginPct >= 25 ? `Margin sehat (${avgMarginPct}%)` : `Margin rendah (${avgMarginPct}%). Tambahkan produk margin tinggi.`
+                },
+                {
+                    title: 'Heavy Item Placement Rule',
+                    passed: true,
+                    msg: 'Produk berat ditempatkan di rak bagian bawah'
+                }
+            ];
+
+            rules.forEach(rule => {
+                if (rule.passed) passCount++;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `p-2 rounded-lg flex items-start space-x-2 ${rule.passed ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`;
+                itemDiv.innerHTML = `
+                    <i class="fa-solid ${rule.passed ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-red-500'} text-xs mt-0.5"></i>
+                    <div>
+                        <div class="font-semibold text-slate-800">${rule.title}</div>
+                        <div class="text-[10px] ${rule.passed ? 'text-slate-600' : 'text-red-600'}">${rule.msg}</div>
+                    </div>
+                `;
+                checklistContainer.appendChild(itemDiv);
+            });
+
+            const totalScore = Math.round((passCount / rules.length) * 100);
+            scoreBadge.innerText = `${totalScore}% Pass`;
+            scoreBadge.className = totalScore === 100 ? 'bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold' : 'bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold';
+        }
+
+        function switchViewMode(mode) {
+            currentViewMode = mode;
+            document.querySelectorAll('[id^="btn-mode-"]').forEach(btn => {
+                btn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition text-slate-600 hover:text-slate-900";
+            });
+
+            const activeBtn = document.getElementById(`btn-mode-${mode}`);
+            activeBtn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition bg-brand-600 text-white shadow-sm";
+
+            renderShelves();
+            showToast(`Mode Tampilan: ${mode.toUpperCase()}`);
+        }
+
+        function switchSidebarTab(tab) {
+            document.getElementById('sidebar-tab-products').classList.add('hidden');
+            document.getElementById('sidebar-tab-fixture').classList.add('hidden');
+
+            document.getElementById('tab-btn-products').className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+            document.getElementById('tab-btn-fixture').className = "flex-1 py-3 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+
+            if (tab === 'products') {
+                document.getElementById('sidebar-tab-products').classList.remove('hidden');
+                document.getElementById('tab-btn-products').className = "flex-1 py-3 text-center border-b-2 border-brand-600 text-brand-600 font-bold bg-white";
+            } else {
+                document.getElementById('sidebar-tab-fixture').classList.remove('hidden');
+                document.getElementById('tab-btn-fixture').className = "flex-1 py-3 text-center border-b-2 border-brand-600 text-brand-600 font-bold bg-white";
+            }
+        }
+
+        function filterCategory(cat) {
+            currentActiveCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.className = "category-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap";
+            });
+            event.target.className = "category-btn bg-brand-600 text-white px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm";
+            renderProductLibrary();
+        }
+
+        function filterProducts() {
+            renderProductLibrary();
+        }
+
+        function loadPresetLayout(presetKey) {
+            if (presetKey === 'custom') return;
+
+            initPlanogramState(5);
+            if (presetKey === 'supermarket-bev') {
+                document.getElementById('canopy-title').innerText = 'Kategori: Minuman Botol & Kaleng';
+                planogramData.shelves[0].items = [{ ...productLibrary[0], facings: 3 }];
+                planogramData.shelves[1].items = [{ ...productLibrary[1], facings: 4 }, { ...productLibrary[2], facings: 3 }];
+            } else if (presetKey === 'snack-endcap') {
+                document.getElementById('canopy-title').innerText = 'Kategori: Snack & Confectionery';
+                planogramData.shelves[1].items = [{ ...productLibrary[3], facings: 3 }, { ...productLibrary[4], facings: 2 }];
+            } else if (presetKey === 'beauty-care') {
+                document.getElementById('canopy-title').innerText = 'Kategori: Personal Care & Shampoo';
+                planogramData.shelves[1].items = [{ ...productLibrary[5], facings: 3 }, { ...productLibrary[6], facings: 3 }];
+            }
+
+            renderShelves();
+            updateAnalytics();
+            showToast(`Preset layout '${presetKey}' berhasil dimuat`);
+        }
+
+        function resetPlanogram() {
+            initPlanogramState(planogramData.shelfCount);
+            selectedItemRef = null;
+            renderShelves();
+            updateInspector();
+            updateAnalytics();
+            showToast('Rak berhasil dikosongkan');
+        }
+
+        function openNewProductModal() {
+            resetImagePreview();
+            document.getElementById('modal-new-product').classList.remove('hidden');
+        }
+
+        function closeNewProductModal() {
+            document.getElementById('modal-new-product').classList.add('hidden');
+        }
+
+        /* FITUR DOWNLOAD GAMBAR PLANOGRAM (PNG HIGH RESOLUTION) */
+        function downloadPlanogramImage() {
+            const frame = document.getElementById('gondola-frame');
+            showToast('Sedang memproses gambar planogram...');
+
+            const currentSelected = selectedItemRef;
+            selectedItemRef = null;
+            renderShelves();
+
+            html2canvas(frame, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#f1f5f9'
+            }).then(canvas => {
+                selectedItemRef = currentSelected;
+                renderShelves();
+
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `Planogram_Layout_${Date.now()}.png`;
+                link.href = image;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast('Gambar Planogram berhasil didownload!');
+            }).catch(err => {
+                console.error(err);
+                selectedItemRef = currentSelected;
+                renderShelves();
+                showToast('Gagal memproses gambar. Silakan coba lagi.');
+            });
+        }
+
+        /* FITUR EXPORT LAPORAN PDF SPEC SHEET OTOMATIS */
+        function exportPDFSpecSheet() {
+            showToast('Menyiapkan Laporan PDF Spec Sheet...');
+
+            // Container sementara untuk layout PDF
+            const pdfContainer = document.createElement('div');
+            pdfContainer.className = "p-8 bg-white text-slate-800 font-sans text-xs space-y-6";
+            pdfContainer.style.width = "800px";
+
+            const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            const docId = 'PLN-' + Math.floor(100000 + Math.random() * 900000);
+
+            let pdfHTML = `
+                <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-end">
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900 uppercase tracking-wide">Laporan Spec Sheet Planogram & Merchandising</h1>
+                        <p class="text-xs text-slate-500">Panduan Implementasi Rak & Rincian Finansial SKU Produk</p>
+                    </div>
+                    <div class="text-right text-[11px] font-mono text-slate-600">
+                        <div><strong>DOC ID:</strong> ${docId}</div>
+                        <div><strong>Tanggal:</strong> ${dateStr}</div>
+                    </div>
+                </div>
+
+                <!-- Spesifikasi Rak -->
+                <div class="grid grid-cols-4 gap-3 bg-slate-100 p-3 rounded-lg text-xs border border-slate-200">
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Tipe Fixture</span>
+                        <strong class="text-slate-800 uppercase">${planogramData.fixtureType}</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Dimensi Bay</span>
+                        <strong class="text-slate-800">${planogramData.bayWidth} cm (L) x ${planogramData.gondolaHeight} cm (T)</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Tingkat Rak</span>
+                        <strong class="text-slate-800">${planogramData.shelfCount} Shelves</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 text-[10px] uppercase block">Material</span>
+                        <strong class="text-slate-800 uppercase">${planogramData.shelfMaterial}</strong>
+                    </div>
+                </div>
+            `;
+
+            // Tangkap gambar rak dulu menggunakan html2canvas
+            const frame = document.getElementById('gondola-frame');
+            const currentSelected = selectedItemRef;
+            selectedItemRef = null;
+            renderShelves();
+
+            html2canvas(frame, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                selectedItemRef = currentSelected;
+                renderShelves();
+
+                const imgData = canvas.toDataURL('image/png');
+
+                pdfHTML += `
+                    <!-- Visual Layout Snapshot -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">1. Visual Layout Gondola</h3>
+                        <div class="flex justify-center bg-slate-50 p-3 border border-slate-200 rounded-lg">
+                            <img src="${imgData}" style="max-height: 380px; object-fit: contain;">
+                        </div>
+                    </div>
+
+                    <!-- Summary KPI -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">2. Ringkasan KPI Merchandising & Finansial</h3>
+                        <div class="grid grid-cols-4 gap-3 text-center">
+                            <div class="bg-slate-50 p-2 border rounded-lg">
+                                <div class="text-[10px] text-slate-500">Total Facings</div>
+                                <div class="text-sm font-bold text-slate-900 font-mono">${document.getElementById('kpi-total-capacity').innerText}</div>
+                            </div>
+                            <div class="bg-slate-50 p-2 border rounded-lg">
+                                <div class="text-[10px] text-slate-500">Space Utilization</div>
+                                <div class="text-sm font-bold text-emerald-600 font-mono">${document.getElementById('kpi-space-utilization').innerText}</div>
+                            </div>
+                            <div class="bg-slate-50 p-2 border rounded-lg">
+                                <div class="text-[10px] text-slate-500">Est. Inventory Value</div>
+                                <div class="text-sm font-bold text-slate-900 font-mono">${document.getElementById('kpi-stock-value').innerText}</div>
+                            </div>
+                            <div class="bg-slate-50 p-2 border rounded-lg">
+                                <div class="text-[10px] text-slate-500">Est. Omset Mingguan</div>
+                                <div class="text-sm font-bold text-brand-600 font-mono">${document.getElementById('kpi-weekly-revenue').innerText}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel SKU Detail -->
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">3. Daftar Rincian SKU Produk per Tingkat Rak</h3>
+                        <table class="w-full text-left border-collapse text-[10px]">
+                            <thead>
+                                <tr class="bg-slate-800 text-white font-bold">
+                                    <th class="p-1.5 border">Rak #</th>
+                                    <th class="p-1.5 border">SKU</th>
+                                    <th class="p-1.5 border">Nama Produk</th>
+                                    <th class="p-1.5 border">Kategori</th>
+                                    <th class="p-1.5 border text-center">Facings</th>
+                                    <th class="p-1.5 border">Harga Jual</th>
+                                    <th class="p-1.5 border">Est. Omset/Mgg</th>
+                                    <th class="p-1.5 border">Margin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalRows = 0;
+                planogramData.shelves.forEach((shelf, sIdx) => {
+                    shelf.items.forEach(item => {
+                        totalRows++;
+                        const cost = item.costPrice || (item.price * 0.7);
+                        const marginPct = item.price > 0 ? Math.round(((item.price - cost) / item.price) * 100) : 0;
+                        const weeklyRev = item.price * (item.weeklySales || 20);
+
+                        pdfHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-1.5 border font-bold text-center">Shelf #${sIdx + 1} (${shelf.levelHeightCm}cm)</td>
+                                <td class="p-1.5 border font-mono">${item.sku}</td>
+                                <td class="p-1.5 border font-semibold">${item.name}</td>
+                                <td class="p-1.5 border">${item.category}</td>
+                                <td class="p-1.5 border font-bold text-center">${item.facings}x</td>
+                                <td class="p-1.5 border font-mono">Rp ${item.price.toLocaleString('id-ID')}</td>
+                                <td class="p-1.5 border font-mono text-emerald-700">Rp ${weeklyRev.toLocaleString('id-ID')}</td>
+                                <td class="p-1.5 border font-bold text-brand-600">${marginPct}%</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                if (totalRows === 0) {
+                    pdfHTML += `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">Belum ada produk yang diletakkan di rak.</td></tr>`;
+                }
+
+                pdfHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tanda Tangan & Persetujuan -->
+                    <div class="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs text-slate-600">
+                        <div>
+                            <p class="mb-10">Disiapkan Oleh (Visual Merchandiser):</p>
+                            <p class="font-bold text-slate-900 border-t border-slate-300 pt-1 inline-block px-8">( ________________________ )</p>
+                        </div>
+                        <div>
+                            <p class="mb-10">Disetujui Oleh (Store Manager):</p>
+                            <p class="font-bold text-slate-900 border-t border-slate-300 pt-1 inline-block px-8">( ________________________ )</p>
+                        </div>
+                    </div>
+                `;
+
+                pdfContainer.innerHTML = pdfHTML;
+                document.body.appendChild(pdfContainer);
+
+                const opt = {
+                    margin:       [0.3, 0.3, 0.3, 0.3],
+                    filename:     `Planogram_Spec_Sheet_${docId}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, logging: false },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                    document.body.removeChild(pdfContainer);
+                    showToast('Laporan PDF Spec Sheet berhasil diunduh!');
+                }).catch(err => {
+                    console.error(err);
+                    if (document.body.contains(pdfContainer)) {
+                        document.body.removeChild(pdfContainer);
+                    }
+                    showToast('Gagal memproses PDF. Silakan coba lagi.');
+                });
+            });
+        }
+
+        function handleCreateProduct(e) {
+            e.preventDefault();
+            
+            let selectedColor = document.getElementById('new-prod-color-hex').value.trim();
+            if (!selectedColor.startsWith('#')) {
+                selectedColor = '#' + selectedColor;
+            }
+
+            const shapeManualText = document.getElementById('new-prod-icon-text').value.trim() || 'Produk Standard';
+            const iconSymbol = document.getElementById('new-prod-icon-select').value;
+            const finalImageUrl = uploadedImageBase64 || document.getElementById('new-prod-image-url').value.trim();
+
+            const sellPrice = parseFloat(document.getElementById('new-prod-price').value) || 0;
+            const costPrice = parseFloat(document.getElementById('new-prod-cost-price').value) || (sellPrice * 0.7);
+            const weeklySales = parseInt(document.getElementById('new-prod-weekly-sales').value) || 20;
+
+            const newProd = {
+                id: 'p_' + Date.now(),
+                sku: document.getElementById('new-prod-sku').value.trim(),
+                barcode: document.getElementById('new-prod-barcode').value.trim(),
+                name: document.getElementById('new-prod-name').value.trim(),
+                category: document.getElementById('new-prod-category').value.trim(),
+                brand: document.getElementById('new-prod-brand').value.trim(),
+                price: sellPrice,
+                costPrice: costPrice,
+                weeklySales: weeklySales,
+                width: parseInt(document.getElementById('new-prod-width').value) || 8,
+                height: parseInt(document.getElementById('new-prod-height').value) || 20,
+                color: selectedColor || '#0284C7',
+                shapeName: shapeManualText,
+                icon: iconSymbol,
+                imageUrl: finalImageUrl
+            };
+
+            productLibrary.unshift(newProd);
+            
+            document.getElementById('form-add-product').reset();
+            resetImagePreview();
+            document.getElementById('new-prod-color').value = "#0284c7";
+            document.getElementById('new-prod-color-hex').value = "#0284C7";
+            
+            renderProductLibrary();
+            closeNewProductModal();
+            showToast(`Produk '${newProd.name}' berhasil ditambahkan beserta data finansial!`);
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = "bg-slate-800 border border-brand-500/50 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center space-x-2 animate-bounce pointer-events-auto";
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-brand-400"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
