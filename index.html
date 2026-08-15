@@ -795,21 +795,32 @@
             const inputBayWidth = document.getElementById('input-bay-width');
             if (inputBayWidth) inputBayWidth.value = planogramData.bayWidth;
             const inputShelfDepth = document.getElementById('input-shelf-depth');
-            if (inputShelfDepth) inputShelfDepth.value = planogramData.shelfDepth;
+            if (inputShelfDepth) inputShelfDepth.value = planogramData.shelfDepth || 40;
             const inputGondolaHeight = document.getElementById('input-gondola-height');
             if (inputGondolaHeight) inputGondolaHeight.value = planogramData.gondolaHeight;
 
-            document.getElementById('lbl-shelf-count').innerText = planogramData.shelfCount;
-            document.getElementById('lbl-bay-width').innerText = `${planogramData.bayWidth} cm`;
-            document.getElementById('lbl-shelf-depth').innerText = `${planogramData.shelfDepth} cm`;
-            document.getElementById('lbl-gondola-height').innerText = `${planogramData.gondolaHeight} cm`;
+            const lblShelfCount = document.getElementById('lbl-shelf-count');
+            if (lblShelfCount) lblShelfCount.innerText = planogramData.shelfCount;
+            const lblBayWidth = document.getElementById('lbl-bay-width');
+            if (lblBayWidth) lblBayWidth.innerText = `${planogramData.bayWidth} cm`;
+            const lblShelfDepth = document.getElementById('lbl-shelf-depth');
+            if (lblShelfDepth) lblShelfDepth.innerText = `${planogramData.shelfDepth || 40} cm`;
+            const lblGondolaHeight = document.getElementById('lbl-gondola-height');
+            if (lblGondolaHeight) lblGondolaHeight.innerText = `${planogramData.gondolaHeight} cm`;
             
-            document.getElementById('canvas-bay-width-display').innerText = `${planogramData.bayWidth} cm`;
-            document.getElementById('canvas-shelf-depth-display').innerText = `${planogramData.shelfDepth} cm`;
-            document.getElementById('canvas-gondola-height-display').innerText = `${planogramData.gondolaHeight} cm`;
-            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${planogramData.bayWidth}cm(P) x ${planogramData.shelfDepth}cm(L)`;
-            document.getElementById('canopy-title').innerText = targetRack.name;
-            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${planogramData.bayWidth}x${planogramData.shelfDepth}`;
+            const canvasBayWidth = document.getElementById('canvas-bay-width-display');
+            if (canvasBayWidth) canvasBayWidth.innerText = `${planogramData.bayWidth} cm`;
+            const canvasShelfDepth = document.getElementById('canvas-shelf-depth-display');
+            if (canvasShelfDepth) canvasShelfDepth.innerText = `${planogramData.shelfDepth || 40} cm`;
+            const canvasGondolaHeight = document.getElementById('canvas-gondola-height-display');
+            if (canvasGondolaHeight) canvasGondolaHeight.innerText = `${planogramData.gondolaHeight} cm`;
+
+            const canopyBayCode = document.getElementById('canopy-bay-code');
+            if (canopyBayCode) canopyBayCode.innerText = `BAY #01 • ${planogramData.bayWidth}cm(P) x ${planogramData.shelfDepth || 40}cm(L)`;
+            const canopyTitle = document.getElementById('canopy-title');
+            if (canopyTitle) canopyTitle.innerText = targetRack.name;
+            const footerSpec = document.getElementById('footer-spec-plu');
+            if (footerSpec) footerSpec.innerText = `PLU #GND-${planogramData.bayWidth}x${planogramData.shelfDepth || 40}`;
 
             selectedItemRef = null;
             renderRackLayoutSelect();
@@ -979,20 +990,26 @@
             planogramData.shelfDepth = depth;
             planogramData.gondolaHeight = gondolaH;
 
-            document.getElementById('lbl-shelf-count').innerText = count;
-            document.getElementById('lbl-bay-width').innerText = `${bayW} cm`;
-            if (document.getElementById('lbl-shelf-depth')) {
-                document.getElementById('lbl-shelf-depth').innerText = `${depth} cm`;
-            }
-            document.getElementById('lbl-gondola-height').innerText = `${gondolaH} cm`;
+            const lblShelfCount = document.getElementById('lbl-shelf-count');
+            if (lblShelfCount) lblShelfCount.innerText = count;
+            const lblBayWidth = document.getElementById('lbl-bay-width');
+            if (lblBayWidth) lblBayWidth.innerText = `${bayW} cm`;
+            const lblShelfDepth = document.getElementById('lbl-shelf-depth');
+            if (lblShelfDepth) lblShelfDepth.innerText = `${depth} cm`;
+            const lblGondolaHeight = document.getElementById('lbl-gondola-height');
+            if (lblGondolaHeight) lblGondolaHeight.innerText = `${gondolaH} cm`;
             
-            document.getElementById('canvas-bay-width-display').innerText = `${bayW} cm`;
-            if (document.getElementById('canvas-shelf-depth-display')) {
-                document.getElementById('canvas-shelf-depth-display').innerText = `${depth} cm`;
-            }
-            document.getElementById('canvas-gondola-height-display').innerText = `${gondolaH} cm`;
-            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${bayW}cm(P) x ${depth}cm(L)`;
-            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${bayW}x${depth}`;
+            const canvasBayWidth = document.getElementById('canvas-bay-width-display');
+            if (canvasBayWidth) canvasBayWidth.innerText = `${bayW} cm`;
+            const canvasShelfDepth = document.getElementById('canvas-shelf-depth-display');
+            if (canvasShelfDepth) canvasShelfDepth.innerText = `${depth} cm`;
+            const canvasGondolaHeight = document.getElementById('canvas-gondola-height-display');
+            if (canvasGondolaHeight) canvasGondolaHeight.innerText = `${gondolaH} cm`;
+
+            const canopyBayCode = document.getElementById('canopy-bay-code');
+            if (canopyBayCode) canopyBayCode.innerText = `BAY #01 • ${bayW}cm(P) x ${depth}cm(L)`;
+            const footerSpec = document.getElementById('footer-spec-plu');
+            if (footerSpec) footerSpec.innerText = `PLU #GND-${bayW}x${depth}`;
 
             const frame = document.getElementById('gondola-frame');
             if (frame) {
