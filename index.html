@@ -85,7 +85,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-tight tracking-wide text-slate-900">Planogram & Visual Merchandising Studio</h1>
-                <p class="text-xs text-slate-500">Custom Rak Layout, Image Upload, Sales Analytics & Export PDF Spec Sheet</p>
+                <p class="text-xs text-slate-500">Custom Rak Layout, Dimensions (P x L x T), Sales Analytics & Export PDF Spec</p>
             </div>
         </div>
 
@@ -105,7 +105,7 @@
             </button>
         </div>
 
-        <!-- Top Actions (Product Add, Excel Import/Template, PNG Download, PDF Spec Export) -->
+        <!-- Top Actions -->
         <div class="flex items-center space-x-2">
             <!-- Custom Rack Selector -->
             <div class="flex items-center space-x-1 border border-slate-300 rounded-lg p-0.5 bg-slate-50">
@@ -201,10 +201,10 @@
                         <i class="fa-solid fa-ruler-combined"></i>
                     </h3>
 
-                    <!-- CUSTOM UKURAN LEBAR RAK -->
+                    <!-- 1. PANJANG (CM) FACING -->
                     <div class="space-y-1">
                         <div class="flex justify-between items-center text-xs">
-                            <label class="text-slate-700 font-medium">Lebar Bay Rak (cm):</label>
+                            <label class="text-slate-700 font-medium">Panjang (cm) Facing:</label>
                             <span id="lbl-bay-width" class="font-bold text-brand-600 font-mono">120 cm</span>
                         </div>
                         <input type="range" id="input-bay-width" min="60" max="240" step="10" value="120" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
@@ -215,10 +215,10 @@
                         </div>
                     </div>
 
-                    <!-- CUSTOM UKURAN TINGGI GONDOLA -->
+                    <!-- 2. TINGGI (CM) TOTAL GONDOLA -->
                     <div class="space-y-1">
                         <div class="flex justify-between items-center text-xs">
-                            <label class="text-slate-700 font-medium">Tinggi Total Rak (cm):</label>
+                            <label class="text-slate-700 font-medium">Tinggi (cm) Total Rak:</label>
                             <span id="lbl-gondola-height" class="font-bold text-brand-600 font-mono">180 cm</span>
                         </div>
                         <input type="range" id="input-gondola-height" min="100" max="250" step="10" value="180" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
@@ -277,8 +277,8 @@
         <main class="flex-1 bg-slate-200/70 flex flex-col overflow-hidden relative">
             <div class="bg-white border-b border-slate-200 px-6 py-2 flex justify-between items-center text-xs text-slate-600 z-10 shrink-0 shadow-sm">
                 <div class="flex items-center space-x-4">
-                    <span><i class="fa-solid fa-ruler-horizontal text-brand-600 mr-1"></i> Lebar Bay: <strong id="canvas-bay-width-display" class="text-slate-800">120 cm</strong></span>
-                    <span><i class="fa-solid fa-ruler-vertical text-brand-600 mr-1"></i> Tinggi: <strong id="canvas-gondola-height-display" class="text-slate-800">180 cm</strong></span>
+                    <span><i class="fa-solid fa-ruler-horizontal text-brand-600 mr-1"></i> Panjang Facing: <strong id="canvas-bay-width-display" class="text-slate-800">120 cm</strong></span>
+                    <span><i class="fa-solid fa-ruler-vertical text-brand-600 mr-1"></i> Tinggi Total: <strong id="canvas-gondola-height-display" class="text-slate-800">180 cm</strong></span>
                     <span id="selected-shelf-indicator" class="text-brand-600 font-medium"><i class="fa-solid fa-hand-pointer mr-1"></i> Klik rak untuk memilih</span>
                 </div>
                 <div id="vm-status-tag" class="bg-amber-50 border border-amber-300 text-amber-700 px-2.5 py-0.5 rounded-full text-[11px] font-medium flex items-center space-x-1">
@@ -329,7 +329,6 @@
                     </div>
                     
                     <div class="flex items-center space-x-3 my-1">
-                        <!-- Preview gambar produk jika ada -->
                         <div id="insp-img-container" class="w-12 h-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden hidden shadow-sm">
                             <img id="insp-img" src="" class="w-full h-full object-contain p-1">
                         </div>
@@ -361,6 +360,12 @@
                             <div>
                                 <span class="text-slate-400 text-[10px] block">Dimensi (P x L x T)</span>
                                 <span id="insp-dim" class="font-medium text-slate-800">-</span>
+                            </div>
+                            <div class="col-span-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                                <div class="flex justify-between items-center text-[10px]">
+                                    <span class="text-slate-500 font-medium"><i class="fa-solid fa-boxes-packing text-brand-600 mr-1"></i>Kapasitas Kedalaman (Deep):</span>
+                                    <span id="insp-holding-cap" class="font-bold text-slate-900 font-mono">-</span>
+                                </div>
                             </div>
                         </div>
 
@@ -412,11 +417,13 @@
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
                             <span class="text-slate-500 text-[10px] block">Total Item Capacity</span>
-                            <span id="kpi-total-capacity" class="text-base font-bold text-slate-800 font-mono">0 Facings</span>
+                            <span id="kpi-total-capacity" class="text-base font-bold text-slate-800 font-mono">0 Facings (0 Pcs)</span>
+                            <span class="text-[10px] text-slate-400 block">Muka & Tumpukan Belakang</span>
                         </div>
                         <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-sm">
                             <span class="text-slate-500 text-[10px] block">Space Occupancy</span>
                             <span id="kpi-space-utilization" class="text-base font-bold text-emerald-600 font-mono">0%</span>
+                            <span class="text-[10px] text-slate-400 block">Efisiensi Ruang Linier</span>
                         </div>
                     </div>
                 </div>
@@ -461,10 +468,14 @@
                     <input type="text" id="new-rack-name" required placeholder="Contoh: Health & Beauty Gondola, Gondola Minuman 160cm, Endcap Snack" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 outline-none focus:border-brand-500">
                 </div>
 
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-slate-700 mb-1 font-medium">Lebar (cm)</label>
+                        <label class="block text-slate-700 mb-1 font-medium">Panjang (cm) facing</label>
                         <input type="number" id="new-rack-width" required value="120" min="60" max="240" step="10" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 mb-1 font-medium">Lebar (cm) dalam</label>
+                        <input type="number" id="new-rack-depth" required value="40" min="20" max="80" step="5" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500 font-mono">
                     </div>
                     <div>
                         <label class="block text-slate-700 mb-1 font-medium">Tinggi (cm)</label>
@@ -564,10 +575,10 @@
                     </div>
                 </div>
 
-                <!-- 3 KOLOM DIMENSI: LEBAR MUKA (P), KEDALAMAN (L), TINGGI (T) -->
+                <!-- 3 KOLOM DIMENSI: PANJANG FACING (P), KEDALAMAN (L), TINGGI (T) -->
                 <div class="grid grid-cols-3 gap-2">
                     <div>
-                        <label class="block text-slate-700 mb-1 font-medium">Lebar Muka P (cm) *</label>
+                        <label class="block text-slate-700 mb-1 font-medium">Panjang Facing P (cm) *</label>
                         <input type="number" id="new-prod-width" required value="8" min="1" max="120" class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-500">
                     </div>
                     <div>
@@ -626,7 +637,8 @@
 
     <script>
         let planogramData = {
-            bayWidth: 120,          
+            bayWidth: 120,
+            shelfDepth: 40,
             gondolaHeight: 180,     
             shelfCount: 5,
             shelves: []
@@ -637,6 +649,7 @@
                 id: 'rack_default_1',
                 name: 'Health & Beauty Gondola',
                 bayWidth: 120,
+                shelfDepth: 40,
                 gondolaHeight: 180,
                 shelfCount: 5,
                 shelves: []
@@ -645,6 +658,7 @@
                 id: 'rack_default_2',
                 name: 'Gondola Minuman Botol',
                 bayWidth: 160,
+                shelfDepth: 50,
                 gondolaHeight: 200,
                 shelfCount: 5,
                 shelves: []
@@ -749,6 +763,7 @@
             const currentRack = customRacks.find(r => r.id === activeRackId);
             if (currentRack) {
                 currentRack.bayWidth = planogramData.bayWidth;
+                currentRack.shelfDepth = planogramData.shelfDepth;
                 currentRack.gondolaHeight = planogramData.gondolaHeight;
                 currentRack.shelfCount = planogramData.shelfCount;
                 currentRack.shelves = JSON.parse(JSON.stringify(planogramData.shelves));
@@ -765,6 +780,7 @@
             if (!targetRack) return;
 
             planogramData.bayWidth = targetRack.bayWidth;
+            planogramData.shelfDepth = targetRack.shelfDepth || 40;
             planogramData.gondolaHeight = targetRack.gondolaHeight;
             planogramData.shelfCount = targetRack.shelfCount;
             
@@ -778,17 +794,22 @@
             if (inputShelfCount) inputShelfCount.value = planogramData.shelfCount;
             const inputBayWidth = document.getElementById('input-bay-width');
             if (inputBayWidth) inputBayWidth.value = planogramData.bayWidth;
+            const inputShelfDepth = document.getElementById('input-shelf-depth');
+            if (inputShelfDepth) inputShelfDepth.value = planogramData.shelfDepth;
             const inputGondolaHeight = document.getElementById('input-gondola-height');
             if (inputGondolaHeight) inputGondolaHeight.value = planogramData.gondolaHeight;
 
             document.getElementById('lbl-shelf-count').innerText = planogramData.shelfCount;
             document.getElementById('lbl-bay-width').innerText = `${planogramData.bayWidth} cm`;
+            document.getElementById('lbl-shelf-depth').innerText = `${planogramData.shelfDepth} cm`;
             document.getElementById('lbl-gondola-height').innerText = `${planogramData.gondolaHeight} cm`;
+            
             document.getElementById('canvas-bay-width-display').innerText = `${planogramData.bayWidth} cm`;
+            document.getElementById('canvas-shelf-depth-display').innerText = `${planogramData.shelfDepth} cm`;
             document.getElementById('canvas-gondola-height-display').innerText = `${planogramData.gondolaHeight} cm`;
-            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${planogramData.bayWidth}cm`;
+            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${planogramData.bayWidth}cm(P) x ${planogramData.shelfDepth}cm(L)`;
             document.getElementById('canopy-title').innerText = targetRack.name;
-            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${planogramData.bayWidth}`;
+            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${planogramData.bayWidth}x${planogramData.shelfDepth}`;
 
             selectedItemRef = null;
             renderRackLayoutSelect();
@@ -812,6 +833,7 @@
             if (!rackName) return;
 
             const w = parseInt(document.getElementById('new-rack-width').value) || 120;
+            const d = parseInt(document.getElementById('new-rack-depth').value) || 40;
             const h = parseInt(document.getElementById('new-rack-height').value) || 180;
             const count = parseInt(document.getElementById('new-rack-count').value) || 5;
 
@@ -822,6 +844,7 @@
                 id: newId,
                 name: rackName,
                 bayWidth: w,
+                shelfDepth: d,
                 gondolaHeight: h,
                 shelfCount: count,
                 shelves: []
@@ -942,25 +965,34 @@
         function updateFixtureSettings() {
             const countInput = document.getElementById('input-shelf-count');
             const bayWInput = document.getElementById('input-bay-width');
+            const depthInput = document.getElementById('input-shelf-depth');
             const gondolaHInput = document.getElementById('input-gondola-height');
 
             if (!countInput || !bayWInput || !gondolaHInput) return;
 
             const count = parseInt(countInput.value) || 5;
             const bayW = parseInt(bayWInput.value) || 120;
+            const depth = depthInput ? (parseInt(depthInput.value) || 40) : 40;
             const gondolaH = parseInt(gondolaHInput.value) || 180;
 
             planogramData.bayWidth = bayW;
+            planogramData.shelfDepth = depth;
             planogramData.gondolaHeight = gondolaH;
 
             document.getElementById('lbl-shelf-count').innerText = count;
             document.getElementById('lbl-bay-width').innerText = `${bayW} cm`;
+            if (document.getElementById('lbl-shelf-depth')) {
+                document.getElementById('lbl-shelf-depth').innerText = `${depth} cm`;
+            }
             document.getElementById('lbl-gondola-height').innerText = `${gondolaH} cm`;
             
             document.getElementById('canvas-bay-width-display').innerText = `${bayW} cm`;
+            if (document.getElementById('canvas-shelf-depth-display')) {
+                document.getElementById('canvas-shelf-depth-display').innerText = `${depth} cm`;
+            }
             document.getElementById('canvas-gondola-height-display').innerText = `${gondolaH} cm`;
-            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${bayW}cm`;
-            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${bayW}`;
+            document.getElementById('canopy-bay-code').innerText = `BAY #01 • ${bayW}cm(P) x ${depth}cm(L)`;
+            document.getElementById('footer-spec-plu').innerText = `PLU #GND-${bayW}x${depth}`;
 
             const frame = document.getElementById('gondola-frame');
             if (frame) {
@@ -980,17 +1012,21 @@
 
             for (let f = 0; f < item.facings; f++) {
                 facingsHTML += `
-                    <div class="w-7 h-12 rounded bg-white border border-slate-300 flex flex-col items-center justify-between p-0.5 text-[8px] font-bold shadow-sm relative overflow-hidden" style="${!hasImg ? 'background-color:' + item.color + '; color:#fff;' : 'color:#1e293b;'}">
-                        <span class="text-[7px] bg-slate-900/40 text-white px-1 rounded font-mono">1x</span>
-                        ${hasImg ? `<img src="${item.imageUrl}" class="w-full h-7 object-contain">` : `<i class="fa-solid ${item.icon} text-xs my-auto"></i>`}
-                        <span class="truncate w-full text-center leading-none">${item.name}</span>
+                    <div class="w-8 h-13 rounded bg-white border border-slate-300 flex flex-col items-center justify-between p-0.5 text-[8px] font-bold shadow-sm relative overflow-hidden" style="${!hasImg ? 'background-color:' + item.color + '; color:#fff;' : 'color:#1e293b;'}">
+                        ${hasImg ? `<img src="${item.imageUrl}" class="w-full h-8 object-contain">` : `<i class="fa-solid ${item.icon} text-xs my-auto"></i>`}
+                        <span class="truncate w-full text-center leading-none text-[8px] mb-0.5">${item.name}</span>
                     </div>
                 `;
             }
 
             return `
-                <div onclick="event.stopPropagation(); selectShelfItem(${sIndex}, ${iIndex})" class="facing-item flex space-x-0.5 cursor-pointer p-0.5 rounded items-end ${isSelected ? 'ring-2 ring-amber-500 bg-amber-100/60' : ''}">
-                    ${facingsHTML}
+                <div onclick="event.stopPropagation(); selectShelfItem(${sIndex}, ${iIndex})" class="facing-item flex flex-col items-center cursor-pointer p-0.5 rounded ${isSelected ? 'ring-2 ring-amber-500 bg-amber-100/60' : ''}">
+                    <div class="bg-brand-900/90 text-white text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-t-md border-b border-white/20 shadow-xs flex items-center space-x-1 mb-0.5">
+                        <span>${item.facings} Facing</span>
+                    </div>
+                    <div class="flex space-x-0.5 items-end">
+                        ${facingsHTML}
+                    </div>
                 </div>
             `;
         }
@@ -1022,7 +1058,6 @@
                             <span class="font-mono font-bold text-slate-800">${shelf.levelHeightCm} cm</span>
                             ${zoneTag}
                         </div>
-                        <!-- KONTROL MANUAL HAPUS RAK DARI CANVAS -->
                         <div class="flex items-center space-x-1.5">
                             <button onclick="event.stopPropagation(); deleteShelfAt(${sIndex})" title="Hapus tingkat rak ini" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded font-medium transition text-[10px] flex items-center space-x-1">
                                 <i class="fa-solid fa-trash-can text-[9px]"></i>
@@ -1043,7 +1078,7 @@
 
                         ${shelf.items.length === 0 ? `
                             <div class="w-full h-full flex items-center justify-center text-slate-400 text-[11px] italic pointer-events-none">
-                                Rak Kosong (${planogramData.bayWidth}cm) - Seret produk dari katalog ke sini
+                                Rak Kosong (${planogramData.bayWidth}cm P x ${planogramData.shelfDepth || 40}cm L) - Seret produk dari katalog ke sini
                             </div>
                         ` : ''}
 
@@ -1052,7 +1087,7 @@
 
                     <div class="${materialClass} h-4 w-full rounded-b-md flex items-center justify-between px-3 text-[9px] font-mono font-bold text-slate-800 tracking-wider uppercase border-t border-white/40 shadow-sm">
                         <span>Shelf #${sIndex + 1}</span>
-                        <span>Width: ${planogramData.bayWidth}cm</span>
+                        <span>PANJANG: ${planogramData.bayWidth}CM | LEBAR DALAM: ${planogramData.shelfDepth || 40}CM</span>
                     </div>
                 `;
 
@@ -1083,24 +1118,6 @@
             if (countInput) countInput.value = count;
             const countLbl = document.getElementById('lbl-shelf-count');
             if (countLbl) countLbl.innerText = count;
-        }
-
-        function addShelfAt(sIndex) {
-            if (planogramData.shelves.length >= 10) {
-                showToast("Maksimal 10 tingkat rak per gondola!");
-                return;
-            }
-            planogramData.shelves.splice(sIndex, 0, {
-                id: `shelf-temp`,
-                levelHeightCm: 0,
-                items: []
-            });
-            recalculateShelfHeights();
-            selectedShelfIndex = sIndex;
-            renderShelves();
-            updateAnalytics();
-            saveCurrentStateToActiveRack();
-            showToast(`Tingkat rak baru berhasil disisipkan! Total: ${planogramData.shelves.length} rak`);
         }
 
         function addShelfAtBottom() {
@@ -1285,6 +1302,7 @@
             const inspImg = document.getElementById('insp-img');
             const onShelfControls = document.getElementById('insp-on-shelf-controls');
             const btnRemoveFromShelf = document.getElementById('btn-remove-from-shelf');
+            const inspHoldingCap = document.getElementById('insp-holding-cap');
 
             let item = null;
             let isOnShelf = false;
@@ -1330,6 +1348,15 @@
             const l = item.depth || 5;
             const t = item.height || 20;
             document.getElementById('insp-dim').innerText = `${p} × ${l} × ${t} cm`;
+
+            const shelfDepthCm = planogramData.shelfDepth || 40;
+            const unitsDeep = Math.max(1, Math.floor(shelfDepthCm / l));
+            const currentFacings = item.facings || 1;
+            const totalUnitsHolding = currentFacings * unitsDeep;
+
+            if (inspHoldingCap) {
+                inspHoldingCap.innerText = `${unitsDeep} Deep → ${totalUnitsHolding} Pcs Total`;
+            }
 
             if (isOnShelf) {
                 document.getElementById('insp-facings-count').innerText = item.facings;
@@ -1402,6 +1429,7 @@
 
         function updateAnalytics() {
             let totalFacingsCount = 0;
+            let totalPcsCount = 0;
             let totalWidthUsedCm = 0;
             let totalStockValue = 0;
             let totalMonthlyRevenue = 0;
@@ -1412,6 +1440,7 @@
             let categorySpaceMap = {};
 
             const maxCapacityWidthCm = planogramData.shelfCount * planogramData.bayWidth;
+            const shelfDepthCm = planogramData.shelfDepth || 40;
 
             planogramData.shelves.forEach(shelf => {
                 const isGolden = shelf.levelHeightCm >= 120 && shelf.levelHeightCm <= 150;
@@ -1421,10 +1450,15 @@
                     const costPrice = item.costPrice || (item.price * 0.7);
                     const monthlySalesVol = item.monthlySales || 80;
 
+                    const itemDepth = item.depth || 5;
+                    const unitsDeep = Math.max(1, Math.floor(shelfDepthCm / itemDepth));
+                    const itemTotalPcs = item.facings * unitsDeep;
+
                     totalFacingsCount += item.facings;
+                    totalPcsCount += itemTotalPcs;
                     totalWidthUsedCm += itemTotalWidth;
                     
-                    totalStockValue += (item.price * item.facings * 3);
+                    totalStockValue += (item.price * itemTotalPcs);
 
                     const itemRev = item.price * monthlySalesVol;
                     const itemCost = costPrice * monthlySalesVol;
@@ -1448,7 +1482,7 @@
             const avgMarginPct = totalMonthlyRevenue > 0 ? Math.round((totalMonthlyProfit / totalMonthlyRevenue) * 100) : 0;
             const revenuePerCm = planogramData.bayWidth > 0 ? Math.round(totalMonthlyRevenue / planogramData.bayWidth) : 0;
 
-            document.getElementById('kpi-total-capacity').innerText = `${totalFacingsCount} Facings`;
+            document.getElementById('kpi-total-capacity').innerText = `${totalFacingsCount} Facings (${totalPcsCount} Pcs)`;
             document.getElementById('kpi-space-utilization').innerText = `${occupancyPct}%`;
             document.getElementById('kpi-stock-value').innerText = `Rp ${totalStockValue.toLocaleString('id-ID')}`;
             document.getElementById('kpi-monthly-revenue').innerText = `Rp ${totalMonthlyRevenue.toLocaleString('id-ID')}`;
@@ -1816,8 +1850,8 @@
                         <strong class="text-slate-800 uppercase">${rackName}</strong>
                     </div>
                     <div>
-                        <span class="text-slate-500 text-[10px] uppercase block">Dimensi Bay</span>
-                        <strong class="text-slate-800">${planogramData.bayWidth} cm (L) x ${planogramData.gondolaHeight} cm (T)</strong>
+                        <span class="text-slate-500 text-[10px] uppercase block">Dimensi Bay Rak</span>
+                        <strong class="text-slate-800">${planogramData.bayWidth} cm (P) x ${planogramData.shelfDepth || 40} cm (L) x ${planogramData.gondolaHeight} cm (T)</strong>
                     </div>
                     <div>
                         <span class="text-slate-500 text-[10px] uppercase block">Tingkat Rak</span>
@@ -1844,35 +1878,6 @@
 
                 pdfHTML += `
                     <div class="space-y-2">
-                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">1. Visual Layout Gondola</h3>
-                        <div class="flex justify-center bg-slate-50 p-3 border border-slate-200 rounded-lg">
-                            <img src="${imgData}" style="max-height: 380px; object-fit: contain;">
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">2. Ringkasan KPI Merchandising & Finansial</h3>
-                        <div class="grid grid-cols-4 gap-3 text-center">
-                            <div class="bg-slate-50 p-2 border rounded-lg">
-                                <div class="text-[10px] text-slate-500">Total Facings</div>
-                                <div class="text-sm font-bold text-slate-900 font-mono">${document.getElementById('kpi-total-capacity').innerText}</div>
-                            </div>
-                            <div class="bg-slate-50 p-2 border rounded-lg">
-                                <div class="text-[10px] text-slate-500">Space Utilization</div>
-                                <div class="text-sm font-bold text-emerald-600 font-mono">${document.getElementById('kpi-space-utilization').innerText}</div>
-                            </div>
-                            <div class="bg-slate-50 p-2 border rounded-lg">
-                                <div class="text-[10px] text-slate-500">Est. Inventory Value</div>
-                                <div class="text-sm font-bold text-slate-900 font-mono">${document.getElementById('kpi-stock-value').innerText}</div>
-                            </div>
-                            <div class="bg-slate-50 p-2 border rounded-lg">
-                                <div class="text-[10px] text-slate-500">Est. Omset Bulanan</div>
-                                <div class="text-sm font-bold text-brand-600 font-mono">${document.getElementById('kpi-monthly-revenue').innerText}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
                         <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">3. Daftar Rincian SKU Produk per Tingkat Rak</h3>
                         <table class="w-full text-left border-collapse text-[10px]">
                             <thead>
@@ -1881,7 +1886,9 @@
                                     <th class="p-1.5 border">SKU</th>
                                     <th class="p-1.5 border">Nama Produk</th>
                                     <th class="p-1.5 border">Kategori</th>
-                                    <th class="p-1.5 border text-center">Facings</th>
+                                    <th class="p-1.5 border text-center">Facing (F)</th>
+                                    <th class="p-1.5 border text-center">Deep (D)</th>
+                                    <th class="p-1.5 border text-center">Total (Pcs)</th>
                                     <th class="p-1.5 border">Harga Jual</th>
                                     <th class="p-1.5 border">Est. Omset/Bln</th>
                                     <th class="p-1.5 border">Margin</th>
@@ -1891,12 +1898,16 @@
                 `;
 
                 let totalRows = 0;
+                const shelfDepthCm = planogramData.shelfDepth || 40;
                 planogramData.shelves.forEach((shelf, sIdx) => {
                     shelf.items.forEach(item => {
                         totalRows++;
                         const cost = item.costPrice || (item.price * 0.7);
                         const marginPct = item.price > 0 ? Math.round(((item.price - cost) / item.price) * 100) : 0;
                         const monthlyRev = item.price * (item.monthlySales || 80);
+                        const itemDepth = item.depth || 5;
+                        const unitsDeep = Math.max(1, Math.floor(shelfDepthCm / itemDepth));
+                        const totalHoldingPcs = item.facings * unitsDeep;
 
                         pdfHTML += `
                             <tr class="border-b hover:bg-slate-50">
@@ -1904,7 +1915,9 @@
                                 <td class="p-1.5 border font-mono">${item.sku}</td>
                                 <td class="p-1.5 border font-semibold">${item.name}</td>
                                 <td class="p-1.5 border">${item.category}</td>
-                                <td class="p-1.5 border font-bold text-center">${item.facings}x</td>
+                                <td class="p-1.5 border font-bold text-center">${item.facings}F</td>
+                                <td class="p-1.5 border font-bold text-center text-brand-600">${unitsDeep}D</td>
+                                <td class="p-1.5 border font-bold text-center text-emerald-700">${totalHoldingPcs} pcs</td>
                                 <td class="p-1.5 border font-mono">Rp ${item.price.toLocaleString('id-ID')}</td>
                                 <td class="p-1.5 border font-mono text-emerald-700">Rp ${monthlyRev.toLocaleString('id-ID')}</td>
                                 <td class="p-1.5 border font-bold text-brand-600">${marginPct}%</td>
@@ -1914,7 +1927,7 @@
                 });
 
                 if (totalRows === 0) {
-                    pdfHTML += `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">Belum ada produk yang diletakkan di rak ini.</td></tr>`;
+                    pdfHTML += `<tr><td colspan="10" class="p-4 text-center text-slate-400 italic">Belum ada produk yang diletakkan di rak ini.</td></tr>`;
                 }
 
                 pdfHTML += `
@@ -2020,3 +2033,4 @@
     </script>
 </body>
 </html>
+```
