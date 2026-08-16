@@ -77,7 +77,6 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
-    <!-- Top Navigation Header -->
     <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 z-20 shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="bg-brand-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-brand-600/20">
@@ -150,7 +149,6 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <div class="flex-1 flex overflow-hidden">
 
         <!-- LEFT SIDEBAR: Fixture Settings & Product Library -->
@@ -193,7 +191,6 @@
                 </div>
             </div>
 
-            <!-- Tab 2: Fixture Controls (Custom Dimension Rak) -->
             <div id="sidebar-tab-fixture" class="hidden flex-1 p-4 space-y-4 overflow-y-auto">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3.5">
                     <h3 class="text-xs font-semibold text-brand-600 uppercase tracking-wider flex items-center justify-between">
@@ -215,7 +212,21 @@
                         </div>
                     </div>
 
-                    <!-- 2. TINGGI (CM) TOTAL GONDOLA -->
+                    <!-- 2. LEBAR (CM) DALAM -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <label class="text-slate-700 font-medium">Lebar (cm) Dalam:</label>
+                            <span id="lbl-shelf-depth" class="font-bold text-brand-600 font-mono">40 cm</span>
+                        </div>
+                        <input type="range" id="input-shelf-depth" min="10" max="200" step="1" value="40" oninput="updateFixtureSettings()" class="w-full accent-brand-600 cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                            <span>10cm</span>
+                            <span>100cm</span>
+                            <span>200cm</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. TINGGI (CM) TOTAL GONDOLA -->
                     <div class="space-y-1">
                         <div class="flex justify-between items-center text-xs">
                             <label class="text-slate-700 font-medium">Tinggi (cm) Total Rak:</label>
@@ -273,11 +284,11 @@
             </div>
         </aside>
 
-        <!-- CENTER WORKSPACE: Planogram Shelf Canvas -->
         <main class="flex-1 bg-slate-200/70 flex flex-col overflow-hidden relative">
             <div class="bg-white border-b border-slate-200 px-6 py-2 flex justify-between items-center text-xs text-slate-600 z-10 shrink-0 shadow-sm">
                 <div class="flex items-center space-x-4">
                     <span><i class="fa-solid fa-ruler-horizontal text-brand-600 mr-1"></i> Panjang Facing: <strong id="canvas-bay-width-display" class="text-slate-800">120 cm</strong></span>
+                    <span><i class="fa-solid fa-arrows-left-right text-brand-600 mr-1"></i> Lebar Dalam: <strong id="canvas-shelf-depth-display" class="text-slate-800">40 cm</strong></span>
                     <span><i class="fa-solid fa-ruler-vertical text-brand-600 mr-1"></i> Tinggi Total: <strong id="canvas-gondola-height-display" class="text-slate-800">180 cm</strong></span>
                     <span id="selected-shelf-indicator" class="text-brand-600 font-medium"><i class="fa-solid fa-hand-pointer mr-1"></i> Klik rak untuk memilih</span>
                 </div>
@@ -292,7 +303,7 @@
                 <div id="gondola-frame" class="bg-white border-4 border-slate-300 rounded-xl p-6 shadow-xl relative flex flex-col justify-between transition-all duration-300" style="width: 760px; min-height: 680px;">
                     <div id="gondola-canopy" class="bg-gradient-to-r from-brand-600 via-brand-500 to-brand-600 text-white py-2 px-4 rounded-md shadow text-center mb-6 border border-brand-400 flex items-center justify-between">
                         <span class="text-xs uppercase font-bold tracking-wider" id="canopy-title">Health & Beauty Gondola</span>
-                        <span class="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded font-mono" id="canopy-bay-code">BAY #01 • 120cm</span>
+                        <span class="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded font-mono" id="canopy-bay-code">BAY #01 • 120cm(P) x 40cm(L)</span>
                     </div>
 
                     <div id="shelves-container" class="flex-1 flex flex-col justify-between space-y-6 relative">
@@ -302,13 +313,12 @@
                     <div class="mt-6 h-8 bg-slate-100 border-t-2 border-slate-300 rounded-b-md flex justify-between items-center px-6 text-[10px] text-slate-500 font-mono">
                         <span>FLOOR LEVEL (0 cm)</span>
                         <span>FIX-BASE HEAVY LOAD UNIT</span>
-                        <span id="footer-spec-plu">PLU #GND-120</span>
+                        <span id="footer-spec-plu">PLU #GND-120x40</span>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- RIGHT SIDEBAR: Analytics, Item Inspector & VM Audit -->
         <aside class="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-sm">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center space-x-2">
@@ -633,6 +643,60 @@
         </div>
     </div>
 
+    <!-- Modal 3: Preview Gambar PNG -->
+    <div id="modal-preview-png" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-4xl rounded-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col text-slate-800">
+            <button onclick="closePngPreviewModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 mb-1 flex items-center space-x-2 shrink-0 border-b border-slate-200 pb-3">
+                <i class="fa-solid fa-image text-brand-600"></i>
+                <span>Preview Gambar Layout Planogram (PNG)</span>
+            </h3>
+            <p class="text-xs text-slate-500 mb-3">Periksa tampilan visual layout rak sebelum mengunduh file gambar PNG.</p>
+
+            <div class="flex-1 overflow-auto bg-slate-100 p-4 border border-slate-200 rounded-xl flex items-center justify-center min-h-[300px]">
+                <img id="img-preview-png-elem" src="" alt="Preview PNG" class="max-h-[60vh] object-contain rounded-lg shadow-md border border-slate-200">
+            </div>
+
+            <div class="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 mt-3">
+                <button type="button" onclick="closePngPreviewModal()" class="px-5 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100 transition text-xs">Batal</button>
+                <button type="button" onclick="confirmDownloadPng()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-medium shadow-sm transition text-xs flex items-center space-x-1.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Gambar (PNG)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Preview Laporan Spec Sheet PDF -->
+    <div id="modal-preview-pdf" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-5xl rounded-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col text-slate-800">
+            <button onclick="closePdfPreviewModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-base font-bold text-slate-900 mb-1 flex items-center space-x-2 shrink-0 border-b border-slate-200 pb-3">
+                <i class="fa-solid fa-file-pdf text-indigo-600"></i>
+                <span>Preview Laporan Spec Sheet (PDF Landscape A4)</span>
+            </h3>
+            <p class="text-xs text-slate-500 mb-3">Periksa rincian tabel SKU, dimensi rak, dan kuantitas produk sebelum mengunduh PDF.</p>
+
+            <div class="flex-1 overflow-y-auto bg-slate-200/80 p-4 border border-slate-300 rounded-xl max-h-[65vh] no-scrollbar">
+                <div id="pdf-preview-container" class="bg-white mx-auto shadow-lg rounded-lg border border-slate-300 overflow-hidden">
+                    <!-- Dynamic PDF Spec Sheet HTML Content rendered here -->
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-end space-x-2 shrink-0 border-t border-slate-200 mt-3">
+                <button type="button" onclick="closePdfPreviewModal()" class="px-5 py-2 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100 transition text-xs">Batal</button>
+                <button type="button" onclick="confirmDownloadPdf()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium shadow-sm transition text-xs flex items-center space-x-1.5">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Download PDF Spec Sheet</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <script>
@@ -668,6 +732,11 @@
         let activeRackId = 'rack_default_1';
         let uploadedImageBase64 = '';
         let draggedProductId = null;
+
+        // Global variables for preview modals
+        let pendingPngDataUrl = '';
+        let pendingPdfDocId = '';
+        let pendingPdfContainerElement = null;
 
         let productLibrary = [
             { 
@@ -1803,9 +1872,10 @@
             inputElem.value = '';
         }
 
+        // PREVIEW FUNCTIONS BEFORE PNG DOWNLOAD
         function downloadPlanogramImage() {
             const frame = document.getElementById('gondola-frame');
-            showToast('Sedang memproses gambar planogram...');
+            showToast('Menyiapkan preview gambar planogram...');
 
             const currentSelected = selectedItemRef;
             selectedItemRef = null;
@@ -1814,178 +1884,297 @@
             html2canvas(frame, {
                 scale: 2,
                 useCORS: true,
-                allowTaint: true,
+                allowTaint: false,
                 backgroundColor: '#f1f5f9'
             }).then(canvas => {
                 selectedItemRef = currentSelected;
                 renderShelves();
 
-                const image = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `Planogram_Layout_${Date.now()}.png`;
-                link.href = image;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                showToast('Gambar Planogram berhasil didownload!');
+                pendingPngDataUrl = canvas.toDataURL('image/png');
+                document.getElementById('img-preview-png-elem').src = pendingPngDataUrl;
+                document.getElementById('modal-preview-png').classList.remove('hidden');
+                showToast('Preview gambar siap!');
             }).catch(err => {
                 console.error(err);
                 selectedItemRef = currentSelected;
                 renderShelves();
-                showToast('Gagal memproses gambar. Silakan coba lagi.');
+                showToast('Gagal memproses gambar preview. Silakan coba lagi.');
             });
         }
 
-        function exportPDFSpecSheet() {
-            showToast('Menyiapkan Laporan PDF Spec Sheet...');
+        function closePngPreviewModal() {
+            document.getElementById('modal-preview-png').classList.add('hidden');
+            pendingPngDataUrl = '';
+        }
 
-            const pdfContainer = document.createElement('div');
-            pdfContainer.className = "p-8 bg-white text-slate-800 font-sans text-xs space-y-6";
-            pdfContainer.style.width = "800px";
+        function confirmDownloadPng() {
+            if (!pendingPngDataUrl) return;
+            const link = document.createElement('a');
+            link.download = `Planogram_Layout_${Date.now()}.png`;
+            link.href = pendingPngDataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-            const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-            const docId = 'PLN-' + Math.floor(100000 + Math.random() * 900000);
-            const currentRack = customRacks.find(r => r.id === activeRackId);
-            const rackName = currentRack ? currentRack.name : 'Custom Gondola';
+            closePngPreviewModal();
+            showToast('Gambar Planogram berhasil didownload!');
+        }
 
-            let pdfHTML = `
-                <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-end">
-                    <div>
-                        <h1 class="text-xl font-bold text-slate-900 uppercase tracking-wide">Laporan Spec Sheet Planogram & Merchandising</h1>
-                        <p class="text-xs text-slate-500">Panduan Implementasi Rak & Rincian Finansial SKU Produk</p>
-                    </div>
-                    <div class="text-right text-[11px] font-mono text-slate-600">
-                        <div><strong>DOC ID:</strong> ${docId}</div>
-                        <div><strong>Tanggal:</strong> ${dateStr}</div>
-                    </div>
-                </div>
+        async function exportPDFSpecSheet() {
+            showToast('Menyiapkan Preview PDF Spec Sheet (Landscape A4)...');
 
-                <div class="grid grid-cols-3 gap-3 bg-slate-100 p-3 rounded-lg text-xs border border-slate-200">
-                    <div>
-                        <span class="text-slate-500 text-[10px] uppercase block">Jenis Rak Layout</span>
-                        <strong class="text-slate-800 uppercase">${rackName}</strong>
-                    </div>
-                    <div>
-                        <span class="text-slate-500 text-[10px] uppercase block">Dimensi Bay Rak</span>
-                        <strong class="text-slate-800">${planogramData.bayWidth} cm (P) x ${planogramData.shelfDepth || 40} cm (L) x ${planogramData.gondolaHeight} cm (T)</strong>
-                    </div>
-                    <div>
-                        <span class="text-slate-500 text-[10px] uppercase block">Tingkat Rak</span>
-                        <strong class="text-slate-800">${planogramData.shelfCount} Shelves</strong>
-                    </div>
-                </div>
-            `;
-
-            const frame = document.getElementById('gondola-frame');
             const currentSelected = selectedItemRef;
             selectedItemRef = null;
             renderShelves();
 
-            html2canvas(frame, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-            }).then(canvas => {
-                selectedItemRef = currentSelected;
-                renderShelves();
+            const frame = document.getElementById('gondola-frame');
 
-                const imgData = canvas.toDataURL('image/png');
-
-                pdfHTML += `
-                    <div class="space-y-2">
-                        <h3 class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-1">3. Daftar Rincian SKU Produk per Tingkat Rak</h3>
-                        <table class="w-full text-left border-collapse text-[10px]">
-                            <thead>
-                                <tr class="bg-slate-800 text-white font-bold">
-                                    <th class="p-1.5 border">Rak #</th>
-                                    <th class="p-1.5 border">SKU</th>
-                                    <th class="p-1.5 border">Nama Produk</th>
-                                    <th class="p-1.5 border">Kategori</th>
-                                    <th class="p-1.5 border text-center">Facing (F)</th>
-                                    <th class="p-1.5 border text-center">Deep (D)</th>
-                                    <th class="p-1.5 border text-center">Total (Pcs)</th>
-                                    <th class="p-1.5 border">Harga Jual</th>
-                                    <th class="p-1.5 border">Est. Omset/Bln</th>
-                                    <th class="p-1.5 border">Margin</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-
-                let totalRows = 0;
-                const shelfDepthCm = planogramData.shelfDepth || 40;
-                planogramData.shelves.forEach((shelf, sIdx) => {
-                    shelf.items.forEach(item => {
-                        totalRows++;
-                        const cost = item.costPrice || (item.price * 0.7);
-                        const marginPct = item.price > 0 ? Math.round(((item.price - cost) / item.price) * 100) : 0;
-                        const monthlyRev = item.price * (item.monthlySales || 80);
-                        const itemDepth = item.depth || 5;
-                        const unitsDeep = Math.max(1, Math.floor(shelfDepthCm / itemDepth));
-                        const totalHoldingPcs = item.facings * unitsDeep;
-
-                        pdfHTML += `
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-1.5 border font-bold text-center">Shelf #${sIdx + 1} (${shelf.levelHeightCm}cm)</td>
-                                <td class="p-1.5 border font-mono">${item.sku}</td>
-                                <td class="p-1.5 border font-semibold">${item.name}</td>
-                                <td class="p-1.5 border">${item.category}</td>
-                                <td class="p-1.5 border font-bold text-center">${item.facings}F</td>
-                                <td class="p-1.5 border font-bold text-center text-brand-600">${unitsDeep}D</td>
-                                <td class="p-1.5 border font-bold text-center text-emerald-700">${totalHoldingPcs} pcs</td>
-                                <td class="p-1.5 border font-mono">Rp ${item.price.toLocaleString('id-ID')}</td>
-                                <td class="p-1.5 border font-mono text-emerald-700">Rp ${monthlyRev.toLocaleString('id-ID')}</td>
-                                <td class="p-1.5 border font-bold text-brand-600">${marginPct}%</td>
-                            </tr>
-                        `;
-                    });
+            let imgData = '';
+            try {
+                const canvas = await html2canvas(frame, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false,
+                    backgroundColor: '#ffffff'
                 });
-
-                if (totalRows === 0) {
-                    pdfHTML += `<tr><td colspan="10" class="p-4 text-center text-slate-400 italic">Belum ada produk yang diletakkan di rak ini.</td></tr>`;
+                imgData = canvas.toDataURL('image/png');
+            } catch (err) {
+                console.warn('html2canvas capture warning:', err);
+                try {
+                    const canvasFallback = await html2canvas(frame, {
+                        scale: 1.5,
+                        useCORS: false,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff'
+                    });
+                    imgData = canvasFallback.toDataURL('image/png');
+                } catch(e) {
+                    imgData = '';
                 }
+            }
 
-                pdfHTML += `
-                            </tbody>
-                        </table>
+            selectedItemRef = currentSelected;
+            renderShelves();
+
+            const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            pendingPdfDocId = 'PLN-' + Math.floor(100000 + Math.random() * 900000);
+            const currentRack = customRacks.find(r => r.id === activeRackId);
+            const rackName = currentRack ? currentRack.name : 'Custom Gondola';
+
+            const rackP = planogramData.bayWidth;
+            const rackL = planogramData.shelfDepth || 40;
+            const rackT = planogramData.gondolaHeight;
+
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.width = '1000px';
+            pdfContainer.style.backgroundColor = '#ffffff';
+            pdfContainer.style.color = '#1e293b';
+            pdfContainer.style.padding = '24px';
+            pdfContainer.style.fontFamily = 'Inter, sans-serif';
+
+            let pdfHTML = `
+                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h1 style="font-size: 18px; font-weight: bold; color: #0f172a; text-transform: uppercase; margin: 0;">Laporan Spec Sheet Planogram & Merchandising</h1>
+                        <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Panduan Implementasi Rak & Rincian SKU Produk</p>
                     </div>
+                    <div style="text-align: right; font-size: 11px; font-family: monospace; color: #475569;">
+                        <div><strong>DOC ID:</strong> ${pendingPdfDocId}</div>
+                        <div><strong>Tanggal:</strong> ${dateStr}</div>
+                    </div>
+                </div>
 
-                    <div class="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs text-slate-600">
-                        <div>
-                            <p class="mb-10">Disiapkan Oleh (Visual Merchandiser):</p>
-                            <p class="font-bold text-slate-900 border-t border-slate-300 pt-1 inline-block px-8">( ________________________ )</p>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background-color: #f8fafc; padding: 12px; border-radius: 8px; font-size: 11px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                    <div>
+                        <span style="color: #64748b; font-size: 10px; text-transform: uppercase; display: block;">Jenis Rak Layout</span>
+                        <strong style="color: #0f172a; text-transform: uppercase;">${rackName}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 10px; text-transform: uppercase; display: block;">Dimensi Bay Rak (P × L × T)</span>
+                        <strong style="color: #0f172a;">${rackP} cm (P) × ${rackL} cm (L) × ${rackT} cm (T)</strong>
+                    </div>
+                    <div>
+                        <span style="color: #64748b; font-size: 10px; text-transform: uppercase; display: block;">Tingkat Rak</span>
+                        <strong style="color: #0f172a;">${planogramData.shelfCount} Shelves</strong>
+                    </div>
+                </div>
+
+                ${imgData ? `
+                <div style="margin-bottom: 16px;">
+                    <h3 style="font-weight: bold; font-size: 12px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 8px;">1. Visual Layout Gondola</h3>
+                    <div style="display: flex; justify-content: center; background-color: #f8fafc; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        <img id="pdf-gondola-preview-img" src="${imgData}" style="max-height: 280px; object-fit: contain;">
+                    </div>
+                </div>
+                ` : ''}
+
+                <div style="margin-bottom: 16px;">
+                    <h3 style="font-weight: bold; font-size: 12px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 8px;">2. Ringkasan KPI Merchandising & Finansial</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
+                        <div style="background-color: #f8fafc; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <div style="font-size: 9px; color: #64748b;">Total Capacity</div>
+                            <div style="font-size: 11px; font-weight: bold; color: #0f172a; font-family: monospace;">${document.getElementById('kpi-total-capacity')?.innerText || '-'}</div>
                         </div>
-                        <div>
-                            <p class="mb-10">Disetujui Oleh (Store Manager):</p>
-                            <p class="font-bold text-slate-900 border-t border-slate-300 pt-1 inline-block px-8">( ________________________ )</p>
+                        <div style="background-color: #f8fafc; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <div style="font-size: 9px; color: #64748b;">Space Utilization</div>
+                            <div style="font-size: 11px; font-weight: bold; color: #059669; font-family: monospace;">${document.getElementById('kpi-space-utilization')?.innerText || '-'}</div>
+                        </div>
+                        <div style="background-color: #f8fafc; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <div style="font-size: 9px; color: #64748b;">Est. Inventory Value</div>
+                            <div style="font-size: 11px; font-weight: bold; color: #0f172a; font-family: monospace;">${document.getElementById('kpi-stock-value')?.innerText || '-'}</div>
+                        </div>
+                        <div style="background-color: #f8fafc; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <div style="font-size: 9px; color: #64748b;">Est. Omset Bulanan</div>
+                            <div style="font-size: 11px; font-weight: bold; color: #0284c7; font-family: monospace;">${document.getElementById('kpi-monthly-revenue')?.innerText || '-'}</div>
                         </div>
                     </div>
-                `;
+                </div>
 
-                pdfContainer.innerHTML = pdfHTML;
-                document.body.appendChild(pdfContainer);
+                <div>
+                    <h3 style="font-weight: bold; font-size: 12px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 8px;">3. Daftar Rincian SKU Produk per Tingkat Rak</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;">
+                        <thead>
+                            <tr style="background-color: #1e293b; color: #ffffff; font-weight: bold;">
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: center; width: 20%;">Rak # (Ukuran P×L×T)</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: left; width: 12%;">SKU</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: left; width: 28%;">Nama Produk</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: left; width: 15%;">Kategori</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: center; width: 12%;">Facing (F)</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: center; width: 11%;">Deep (D)</th>
+                                <th style="padding: 8px; border: 1px solid #334155; text-align: center; width: 12%;">Total (Pcs)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
 
-                const opt = {
-                    margin:       [0.3, 0.3, 0.3, 0.3],
-                    filename:     `Planogram_Spec_Sheet_${docId}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, logging: false },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
+            let totalRows = 0;
+            const shelfDepthCm = planogramData.shelfDepth || 40;
+            planogramData.shelves.forEach((shelf, sIdx) => {
+                shelf.items.forEach(item => {
+                    totalRows++;
+                    const itemDepth = item.depth || 5;
+                    const unitsDeep = Math.max(1, Math.floor(shelfDepthCm / itemDepth));
+                    const totalHoldingPcs = item.facings * unitsDeep;
+                    const itemP = item.width || 8;
+                    const itemL = item.depth || 5;
 
-                html2pdf().set(opt).from(pdfContainer).save().then(() => {
-                    document.body.removeChild(pdfContainer);
-                    showToast('Laporan PDF Spec Sheet berhasil diunduh!');
-                }).catch(err => {
-                    console.error(err);
-                    if (document.body.contains(pdfContainer)) {
-                        document.body.removeChild(pdfContainer);
-                    }
-                    showToast('Gagal memproses PDF. Silakan coba lagi.');
+                    pdfHTML += `
+                        <tr style="border-bottom: 1px solid #e2e8f0; background-color: ${totalRows % 2 === 0 ? '#f8fafc' : '#ffffff'};">
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold;">
+                                <div style="color: #0f172a;">Shelf #${sIdx + 1} (${shelf.levelHeightCm}cm)</div>
+                                <div style="font-size: 9px; color: #64748b; font-weight: normal; font-family: monospace;">${rackP}×${rackL}×${shelf.levelHeightCm}cm</div>
+                            </td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; font-family: monospace; font-size: 9px; color: #334155;">${item.sku}</td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; font-weight: 600; color: #1e293b;">${item.name}</td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; font-size: 9px; color: #475569;">${item.category}</td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">
+                                <div style="font-weight: bold; color: #0f172a;">${item.facings} Facing</div>
+                                <div style="font-size: 8px; color: #64748b;">(${itemP}cm P)</div>
+                            </td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">
+                                <div style="font-weight: bold; color: #0369a1;">${unitsDeep} Deep</div>
+                                <div style="font-size: 8px; color: #64748b;">(${itemL}cm L)</div>
+                            </td>
+                            <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #047857;">${totalHoldingPcs} pcs</td>
+                        </tr>
+                    `;
                 });
             });
+
+            if (totalRows === 0) {
+                pdfHTML += `<tr><td colspan="7" style="padding: 16px; text-align: center; color: #94a3b8; font-style: italic; border: 1px solid #cbd5e1;">Belum ada produk yang diletakkan di rak ini.</td></tr>`;
+            }
+
+            pdfHTML += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="padding-top: 20px; margin-top: 20px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; text-align: center; font-size: 11px; color: #475569;">
+                    <div>
+                        <p style="margin-bottom: 40px;">Disiapkan Oleh (Visual Merchandiser):</p>
+                        <p style="font-weight: bold; color: #0f172a; border-top: 1px solid #cbd5e1; padding-top: 4px; display: inline-block; padding-left: 24px; padding-right: 24px;">( ________________________ )</p>
+                    </div>
+                    <div>
+                        <p style="margin-bottom: 40px;">Disetujui Oleh (Store Manager):</p>
+                        <p style="font-weight: bold; color: #0f172a; border-top: 1px solid #cbd5e1; padding-top: 4px; display: inline-block; padding-left: 24px; padding-right: 24px;">( ________________________ )</p>
+                    </div>
+                </div>
+            `;
+
+            pdfContainer.innerHTML = pdfHTML;
+            pendingPdfContainerElement = pdfContainer;
+
+            const previewWrapper = document.getElementById('pdf-preview-container');
+            previewWrapper.innerHTML = '';
+            previewWrapper.appendChild(pdfContainer);
+
+            document.getElementById('modal-preview-pdf').classList.remove('hidden');
+            showToast('Preview PDF Spec Sheet siap!');
+        }
+
+        function closePdfPreviewModal() {
+            document.getElementById('modal-preview-pdf').classList.add('hidden');
+            pendingPdfContainerElement = null;
+        }
+
+        async function confirmDownloadPdf() {
+            if (!pendingPdfContainerElement) return;
+
+            showToast('Mengunduh Laporan PDF Spec Sheet...');
+
+            // Create a fixed off-screen container for html2pdf to prevent scroll offset issues
+            const exportWrapper = document.createElement('div');
+            exportWrapper.style.position = 'fixed';
+            exportWrapper.style.top = '0';
+            exportWrapper.style.left = '0';
+            exportWrapper.style.width = '1000px';
+            exportWrapper.style.backgroundColor = '#ffffff';
+            exportWrapper.style.zIndex = '999999';
+            exportWrapper.style.opacity = '1';
+            
+            // Deep clone the preview container
+            const clonedContent = pendingPdfContainerElement.cloneNode(true);
+            exportWrapper.appendChild(clonedContent);
+            document.body.appendChild(exportWrapper);
+
+            // Ensure all images inside cloned content are completely decoded before capturing
+            const images = exportWrapper.querySelectorAll('img');
+            await Promise.all(Array.from(images).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(res => { img.onload = res; img.onerror = res; });
+            }));
+
+            await new Promise(r => setTimeout(r, 250));
+
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     `Planogram_Spec_Sheet_${pendingPdfDocId || 'Report'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    logging: false, 
+                    useCORS: true, 
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(clonedContent).save();
+                showToast('Laporan PDF Spec Sheet berhasil diunduh!');
+            } catch (err) {
+                console.error('PDF Generation error:', err);
+                showToast('Gagal memproses PDF. Silakan coba lagi.');
+            } finally {
+                if (document.body.contains(exportWrapper)) {
+                    document.body.removeChild(exportWrapper);
+                }
+                closePdfPreviewModal();
+            }
         }
 
         function handleCreateProduct(e) {
@@ -2050,4 +2239,3 @@
     </script>
 </body>
 </html>
-```
