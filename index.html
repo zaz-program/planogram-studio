@@ -77,6 +77,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
+    <!-- Top Navigation Header -->
     <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 z-20 shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="bg-brand-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-brand-600/20">
@@ -149,6 +150,7 @@
         </div>
     </header>
 
+    <!-- Main Content Area -->
     <div class="flex-1 flex overflow-hidden">
 
         <!-- LEFT SIDEBAR: Fixture Settings & Product Library -->
@@ -191,6 +193,7 @@
                 </div>
             </div>
 
+            <!-- Tab 2: Fixture Controls (Custom Dimension Rak) -->
             <div id="sidebar-tab-fixture" class="hidden flex-1 p-4 space-y-4 overflow-y-auto">
                 <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3.5">
                     <h3 class="text-xs font-semibold text-brand-600 uppercase tracking-wider flex items-center justify-between">
@@ -284,6 +287,7 @@
             </div>
         </aside>
 
+        <!-- CENTER WORKSPACE: Planogram Shelf Canvas -->
         <main class="flex-1 bg-slate-200/70 flex flex-col overflow-hidden relative">
             <div class="bg-white border-b border-slate-200 px-6 py-2 flex justify-between items-center text-xs text-slate-600 z-10 shrink-0 shadow-sm">
                 <div class="flex items-center space-x-4">
@@ -319,6 +323,7 @@
             </div>
         </main>
 
+        <!-- RIGHT SIDEBAR: Analytics, Item Inspector & VM Audit -->
         <aside class="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-sm">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center space-x-2">
@@ -1096,21 +1101,30 @@
             let facingsHTML = '';
             const hasImg = item.imageUrl && item.imageUrl.trim() !== '';
 
+            const itemWidthCm = item.width || 8;
+            const bayWidthCm = planogramData.bayWidth || 120;
+            const singleFacingWidthPct = Math.min(100, Math.max(1, (itemWidthCm / bayWidthCm) * 100));
+
             for (let f = 0; f < item.facings; f++) {
                 facingsHTML += `
-                    <div class="w-8 h-13 rounded bg-white border border-slate-300 flex flex-col items-center justify-between p-0.5 text-[8px] font-bold shadow-sm relative overflow-hidden" style="${!hasImg ? 'background-color:' + item.color + '; color:#fff;' : 'color:#1e293b;'}">
+                    <div class="h-14 rounded bg-white border border-slate-300 flex flex-col items-center justify-between p-0.5 text-[8px] font-bold shadow-sm relative overflow-hidden shrink-0" 
+                         style="width: ${singleFacingWidthPct}%; min-width: 24px; ${!hasImg ? 'background-color:' + item.color + '; color:#fff;' : 'color:#1e293b;'}">
                         ${hasImg ? `<img src="${item.imageUrl}" class="w-full h-8 object-contain">` : `<i class="fa-solid ${item.icon} text-xs my-auto"></i>`}
-                        <span class="truncate w-full text-center leading-none text-[8px] mb-0.5">${item.name}</span>
+                        <span class="truncate w-full text-center leading-none text-[8px] mb-0.5" title="${item.name}">${item.name}</span>
                     </div>
                 `;
             }
 
+            const totalItemWidthPct = (itemWidthCm * item.facings / bayWidthCm) * 100;
+
             return `
-                <div onclick="event.stopPropagation(); selectShelfItem(${sIndex}, ${iIndex})" class="facing-item flex flex-col items-center cursor-pointer p-0.5 rounded ${isSelected ? 'ring-2 ring-amber-500 bg-amber-100/60' : ''}">
-                    <div class="bg-brand-900/90 text-white text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-t-md border-b border-white/20 shadow-xs flex items-center space-x-1 mb-0.5">
-                        <span>${item.facings} Facing</span>
+                <div onclick="event.stopPropagation(); selectShelfItem(${sIndex}, ${iIndex})" 
+                     class="facing-item flex flex-col items-center cursor-pointer p-0.5 rounded shrink-0 ${isSelected ? 'ring-2 ring-amber-500 bg-amber-100/60' : ''}"
+                     style="width: ${totalItemWidthPct}%; min-width: 28px;">
+                    <div class="bg-brand-900/90 text-white text-[8px] font-mono font-bold px-1 py-0.5 rounded-t-md border-b border-white/20 shadow-xs flex items-center justify-center w-full truncate mb-0.5">
+                        <span>${item.facings}F (${itemWidthCm * item.facings}cm)</span>
                     </div>
-                    <div class="flex space-x-0.5 items-end">
+                    <div class="flex space-x-0.5 items-end w-full justify-center">
                         ${facingsHTML}
                     </div>
                 </div>
@@ -1156,7 +1170,7 @@
                          ondragover="handleDragOver(event)" 
                          ondragleave="handleDragLeave(event, ${sIndex})" 
                          ondrop="handleDrop(event, ${sIndex})" 
-                         class="min-h-[90px] bg-slate-50/80 border border-dashed ${isSelected ? 'border-brand-500 bg-brand-50/20' : 'border-slate-300'} rounded flex items-end px-3 py-1.5 overflow-x-auto space-x-1.5 no-scrollbar relative ${currentViewMode === 'heatmap' && isGoldenZone ? 'golden-zone-overlay' : ''}">
+                         class="min-h-[90px] bg-slate-50/80 border border-dashed ${isSelected ? 'border-brand-500 bg-brand-50/20' : 'border-slate-300'} rounded flex items-end px-3 py-1.5 overflow-x-auto space-x-1 no-scrollbar relative ${currentViewMode === 'heatmap' && isGoldenZone ? 'golden-zone-overlay' : ''}">
                         
                         ${currentViewMode === 'heatmap' ? `
                             <div class="absolute inset-0 pointer-events-none ${isGoldenZone ? 'heatmap-high' : 'heatmap-medium'} opacity-30"></div>
@@ -1744,9 +1758,9 @@
                     'Barcode': '8991234567891',
                     'Kategori': 'Beverage',
                     'Brand': 'SodaBrand',
-                    'Lebar P (cm)': 7,
-                    'Kedalaman L (cm)': 7,
-                    'Tinggi T (cm)': 12,
+                    'Lebar Facing (P - cm)': 7,
+                    'Kedalaman (L - cm)': 7,
+                    'Tinggi (T - cm)': 12,
                     'Harga Jual (Rp)': 8500,
                     'HPP Beli (Rp)': 5500,
                     'Sales Bulanan (Qty)': 150
@@ -1757,9 +1771,9 @@
                     'Barcode': '8991234567892',
                     'Kategori': 'Snack',
                     'Brand': 'SnackBrand',
-                    'Lebar P (cm)': 12,
-                    'Kedalaman L (cm)': 5,
-                    'Tinggi T (cm)': 18,
+                    'Lebar Facing (P - cm)': 12,
+                    'Kedalaman (L - cm)': 5,
+                    'Tinggi (T - cm)': 18,
                     'Harga Jual (Rp)': 12500,
                     'HPP Beli (Rp)': 8000,
                     'Sales Bulanan (Qty)': 200
@@ -1768,7 +1782,7 @@
 
             const worksheet = XLSX.utils.json_to_sheet(templateData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Template Assortment");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Template Master Produk");
 
             XLSX.writeFile(workbook, "Template_Master_Produk_Planogram.xlsx");
             showToast("Template Master Produk berhasil diunduh!");
@@ -1811,10 +1825,10 @@
                     let importedCount = 0;
 
                     jsonRows.forEach((row, idx) => {
-                        const findVal = (keywords) => {
-                            for (let key in row) {
-                                const cleanKey = key.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-                                for (let kw of keywords) {
+                        const getRawVal = (keywords) => {
+                            for (let kw of keywords) {
+                                for (let key in row) {
+                                    const cleanKey = key.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
                                     if (cleanKey.includes(kw)) {
                                         return row[key];
                                     }
@@ -1823,19 +1837,41 @@
                             return null;
                         };
 
-                        const skuRaw = findVal(['sku', 'kode', 'plu', 'article', 'itemcode']) || `IMP-${1000 + idx}`;
-                        const nameRaw = findVal(['nama', 'name', 'deskripsi', 'description', 'product', 'item']) || `Produk Import ${idx + 1}`;
-                        const barcodeRaw = findVal(['barcode', 'ean', 'upc']) || '';
-                        const catRaw = findVal(['kategori', 'category', 'dept', 'golongan']) || 'General';
-                        const brandRaw = findVal(['brand', 'merek', 'supplier', 'vendor']) || 'Generic';
-                        
-                        const pRaw = parseFloat(findVal(['lebar', 'width', 'p', 'facing'])) || 8;
-                        const lRaw = parseFloat(findVal(['kedalaman', 'depth', 'l'])) || 5;
-                        const tRaw = parseFloat(findVal(['tinggi', 'height', 't'])) || 20;
+                        const parseNum = (val, fallback = 0) => {
+                            if (val === null || val === undefined || val === '') return fallback;
+                            if (typeof val === 'number') return isNaN(val) ? fallback : val;
+                            const str = val.toString().replace(',', '.').replace(/[^0-9.]/g, '');
+                            const num = parseFloat(str);
+                            return isNaN(num) ? fallback : num;
+                        };
 
-                        const priceRaw = parseFloat(findVal(['hargajual', 'jual', 'price', 'sellprice', 'retail'])) || 15000;
-                        const costRaw = parseFloat(findVal(['hpp', 'hargabeli', 'cost', 'buy'])) || (priceRaw * 0.7);
-                        const monthlySalesRaw = parseInt(findVal(['sales', 'terjual', 'volume', 'qty', 'bulan'])) || 80;
+                        const skuRaw = getRawVal(['kodesku', 'sku', 'kode', 'plu', 'article', 'itemcode']) || `IMP-${1000 + idx}`;
+                        const nameRaw = getRawVal(['namaproduk', 'nama', 'deskripsi', 'description', 'product', 'item']) || `Produk Import ${idx + 1}`;
+                        const barcodeRaw = getRawVal(['barcode', 'ean', 'upc']) || '';
+                        const catRaw = getRawVal(['kategori', 'category', 'dept', 'golongan']) || 'General';
+                        const brandRaw = getRawVal(['brand', 'merek', 'supplier', 'vendor']) || 'Generic';
+                        
+                        // Strict dimension keywords (do NOT use generic prepositions like 'dalam')
+                        const pVal = getRawVal(['lebarfacing', 'panjangfacing', 'facingwidth', 'lebarp', 'panjangp', 'facingp', 'lebar', 'width']);
+                        const lVal = getRawVal(['kedalamanl', 'kedalaman', 'depth', 'lebardalam', 'lcm']);
+                        const tVal = getRawVal(['tinggit', 'tinggi', 'height', 'tcm']);
+
+                        const priceVal = getRawVal(['hargajual', 'jual', 'price', 'sellprice', 'retail']);
+                        const costVal = getRawVal(['hppbeli', 'hpp', 'hargabeli', 'cost', 'buy']);
+                        const salesVal = getRawVal(['salesbulanan', 'salesbulan', 'sales', 'terjual', 'volume', 'qty']);
+
+                        const pRaw = parseNum(pVal, 8);
+                        let lRaw = parseNum(lVal, 5);
+                        const tRaw = parseNum(tVal, 20);
+
+                        // Physical dimension sanity checks (cm): if L > 200cm, it fell back or matched wrong field
+                        const validP = (pRaw > 0 && pRaw <= 300) ? pRaw : 8;
+                        const validL = (lRaw > 0 && lRaw <= 200) ? lRaw : 5;
+                        const validT = (tRaw > 0 && tRaw <= 300) ? tRaw : 20;
+
+                        const priceRaw = parseNum(priceVal, 15000);
+                        const costRaw = parseNum(costVal, priceRaw * 0.7);
+                        const monthlySalesRaw = parseNum(salesVal, 80);
 
                         const skuStr = skuRaw.toString().trim();
                         const uniqueSku = productLibrary.some(p => p.sku === skuStr) ? `${skuStr}_${idx}` : skuStr;
@@ -1850,9 +1886,9 @@
                             price: priceRaw,
                             costPrice: costRaw,
                             monthlySales: monthlySalesRaw,
-                            width: Math.max(1, pRaw),
-                            depth: Math.max(1, lRaw),
-                            height: Math.max(1, tRaw),
+                            width: validP,
+                            depth: validL,
+                            height: validT,
                             color: '#0284C7',
                             shapeName: 'Produk Import',
                             icon: 'fa-box',
@@ -1920,6 +1956,7 @@
             showToast('Gambar Planogram berhasil didownload!');
         }
 
+        // PREVIEW FUNCTIONS BEFORE PDF EXPORT
         async function exportPDFSpecSheet() {
             showToast('Menyiapkan Preview PDF Spec Sheet (Landscape A4)...');
 
@@ -1974,7 +2011,7 @@
             pdfContainer.style.fontFamily = 'Inter, sans-serif';
 
             let pdfHTML = `
-                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-between: space-between; align-items: flex-end;">
                     <div>
                         <h1 style="font-size: 18px; font-weight: bold; color: #0f172a; text-transform: uppercase; margin: 0;">Laporan Spec Sheet Planogram & Merchandising</h1>
                         <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0;">Panduan Implementasi Rak & Rincian SKU Produk</p>
